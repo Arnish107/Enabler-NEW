@@ -1,0 +1,109 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                      String         @id @default(cuid())
+  email                   String         @unique
+  displayName             String
+  profile                 UserProfile    @default(DEAF)
+  preferredSpokenLanguage String         @default("en")
+  preferredSignLanguage   String         @default("asl")
+  avatarStyle             AvatarStyle    @default(FEMALE)
+  createdAt               DateTime       @default(now())
+  updatedAt               DateTime       @updatedAt
+  translations            Translation[]
+  conversations           Conversation[]
+  learningProgress        LearningProgress?
+}
+
+enum UserProfile {
+  DEAF
+  HARD_OF_HEARING
+  HEARING
+  INTERPRETER
+  TEACHER
+}
+
+enum AvatarStyle {
+  MALE
+  FEMALE
+  CHILD
+  CUSTOM
+}
+
+enum TranslationDirection {
+  SPEECH_TO_SIGN
+  SIGN_TO_SPEECH
+}
+
+model Translation {
+  id             String               @id @default(cuid())
+  userId         String?
+  user           User?                @relation(fields: [userId], references: [id], onDelete: SetNull)
+  direction      TranslationDirection
+  sourceText     String
+  targetText     String
+  sourceLanguage String
+  targetLanguage String
+  confidence     Float?
+  createdAt      DateTime             @default(now())
+}
+
+model Conversation {
+  id        String                @id @default(cuid())
+  userId    String?
+  user      User?                 @relation(fields: [userId], references: [id], onDelete: SetNull)
+  mode      String
+  startedAt DateTime              @default(now())
+  endedAt   DateTime?
+  messages  ConversationMessage[]
+}
+
+model ConversationMessage {
+  id               String       @id @default(cuid())
+  conversationId   String
+  conversation     Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  speakerLabel     String
+  text             String
+  signLanguageCode String?
+  createdAt        DateTime     @default(now())
+}
+
+model LearningProgress {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  streak           Int      @default(0)
+  level            Int      @default(1)
+  badges           Json     @default("[]")
+  completedLessons Json     @default("[]")
+  accuracy         Float    @default(0)
+  updatedAt        DateTime @updatedAt
+}
+
+model UploadedVideo {
+  id               String   @id @default(cuid())
+  userId           String?
+  title            String?
+  transcript       String?
+  signLanguageCode String?
+  createdAt        DateTime @default(now())
+}
+
+model SoundAlert {
+  id           String   @id @default(cuid())
+  userId       String?
+  type         String
+  enabled      Boolean  @default(true)
+  notifyPush   Boolean  @default(true)
+  flashLight   Boolean  @default(false)
+  vibrate      Boolean  @default(true)
+  watchVibrate Boolean  @default(false)
+  createdAt    DateTime @default(now())
+}
