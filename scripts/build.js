@@ -4,11 +4,8 @@ const path = require("path");
 const root = path.join(__dirname, "..");
 const dist = path.join(root, "dist");
 
-const filesToCopy = [
-  "index.html",
-  path.join("css", "styles.css"),
-  path.join("js", "main.js"),
-];
+const dirsToCopy = ["css", "js", "assets"];
+const filesToCopy = ["index.html"];
 
 function copyRecursive(src, dest) {
   const stat = fs.statSync(src);
@@ -36,9 +33,16 @@ for (const file of filesToCopy) {
     console.error(`Build failed: missing required file "${file}"`);
     process.exit(1);
   }
-  const dest = path.join(dist, file);
-  fs.mkdirSync(path.dirname(dest), { recursive: true });
-  fs.copyFileSync(src, dest);
+  copyRecursive(src, path.join(dist, file));
+}
+
+for (const dir of dirsToCopy) {
+  const src = path.join(root, dir);
+  if (!fs.existsSync(src)) {
+    console.error(`Build failed: missing required directory "${dir}"`);
+    process.exit(1);
+  }
+  copyRecursive(src, path.join(dist, dir));
 }
 
 const publicDir = path.join(root, "public");
