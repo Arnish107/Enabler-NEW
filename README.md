@@ -1,19 +1,42 @@
 # Enabler
 
-**Enabler** is an AI-powered accessibility platform that breaks communication barriers through speech, sign language, and live conversation tools.
+**Enabler** is an API-driven accessibility platform with real backend processing for speech, sign language, and translation.
 
-This repository is a static single-page application ready to deploy on [Vercel](https://vercel.com).
+## Architecture
 
-## Features
+```
+Browser (public/js)              Next.js API (app/api/)
+├── Web Speech API          →    POST /api/speech-to-text
+├── MediaPipe Hands         →    POST /api/sign-to-text
+├── Feature views           →    POST /api/translate
+└── AI enhancement          →    POST /api/ai-process
+```
 
-| Tool | Description |
-|------|-------------|
-| **Speech → Sign** | Microphone input, live transcript, sign animation output, translation history |
-| **Sign → Text** | Camera, video recording, file upload, convert & download transcripts |
-| **Live Conversation** | Split-screen chat with language selector and mock real-time translation |
-| **Video Translation** | MP4/MOV upload, progress indicator, transcript export (.txt, .srt) |
-| **Emergency Communication** | Large tap-to-display cards for critical messages |
-| **Sound Alerts** | Toggle alerts for doorbell, fire alarm, baby crying, phone, car horn |
+All intelligence runs server-side. The frontend only captures input and renders API responses.
+
+## API Endpoints
+
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/api/health` | GET | Service status & capabilities |
+| `/api/speech-to-text` | POST | Transcript validation + AI enhancement |
+| `/api/sign-to-text` | POST | Gesture classification → text |
+| `/api/translate` | POST | Sign mapping & language translation |
+| `/api/ai-process` | POST | AI text enhancement (OpenAI or fallback) |
+
+### Example: Speech → Sign
+
+```bash
+# 1. Validate transcript
+curl -X POST http://localhost:3000/api/speech-to-text \
+  -H "Content-Type: application/json" \
+  -d '{"transcript": "hello I need help", "language": "en-US"}'
+
+# 2. Map to signs
+curl -X POST http://localhost:3000/api/translate \
+  -H "Content-Type: application/json" \
+  -d '{"text": "hello I need help", "direction": "speech-to-sign"}'
+```
 
 ## Quick Start
 
@@ -22,49 +45,47 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to preview locally.
+Open [http://localhost:3000](http://localhost:3000)
 
-## Build
+## Optional: OpenAI Enhancement
+
+Add to `.env.local`:
+
+```
+OPENAI_API_KEY=sk-...
+```
+
+This enables:
+- Whisper server-side audio STT (when audio is sent)
+- GPT-powered transcript cleaning
+- Improved gesture-to-sentence assembly
+- Enhanced translations
+
+Without an API key, the system uses **structured deterministic fallback** logic — never random output.
+
+## Build & Deploy
 
 ```bash
 npm run build
+npm start
 ```
 
-Outputs static files to `dist/` for deployment.
-
-## Deploy to Vercel
-
-1. Push to GitHub
-2. Import at [vercel.com/new](https://vercel.com/new)
-3. Vercel auto-detects settings from `vercel.json`
-4. Click **Deploy**
-
-No environment variables required for the frontend demo.
+Deploy to Vercel as a Next.js project. Set `OPENAI_API_KEY` in Vercel environment variables if desired.
 
 ## Project Structure
 
 ```
-├── index.html              # App shell
-├── assets/                 # Logo, favicon, brand SVGs
-├── css/styles.css          # Design system & components
-├── js/
-│   ├── app.js              # Entry point, theme, nav
-│   ├── router.js           # Hash-based SPA router
-│   ├── utils/              # Toast notifications, local state
-│   └── views/              # Feature page modules
-├── scripts/build.js        # Copies assets to dist/
-└── vercel.json
+app/api/           # Serverless API routes
+lib/               # Backend processing logic
+  data/            # Gesture dictionary & sign mapping
+  sign-classifier.ts
+  speech-processor.ts
+  translate.ts
+  ai-process.ts
+  openai.ts
+public/            # Frontend SPA (UI only)
 ```
 
 ## Stack
 
-HTML · CSS · JavaScript · Vercel Static Hosting
-
-## Brand
-
-Logo colors drive the design system:
-- Primary: `#4B4DFF`
-- Dark: `#0B0B13`
-- Light: `#F8F9FC`
-
-Light and dark themes are supported with a toggle in the navigation bar.
+Next.js 15 · TypeScript · MediaPipe Hands · Web Speech API · OpenAI (optional) · Vercel Serverless

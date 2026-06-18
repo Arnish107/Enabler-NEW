@@ -101,6 +101,16 @@
     registerRoutes();
     EnablerRouter.start();
 
+    EnablerAPI.health()
+      .then(function (health) {
+        if (health.capabilities && health.capabilities.openaiEnabled) {
+          EnablerToast.info("AI backend ready", "OpenAI enhancement enabled.");
+        }
+      })
+      .catch(function () {
+        EnablerToast.warning("API offline", "Start the server with npm run dev.");
+      });
+
     EnablerRouter.onRouteChange(function (path) {
       var sidebar = document.getElementById("app-sidebar");
       if (sidebar && window.innerWidth < 1024 && path !== "home") {

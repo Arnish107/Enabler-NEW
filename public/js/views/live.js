@@ -5,17 +5,16 @@ EnablerViews.live = {
     var messages = EnablerState.get("liveMessages") || [];
     return (
       '<div class="page-header">' +
-      "<h1 class=\"page-title\">Live Conversation</h1>" +
-      '<p class="page-desc">Real-time split-screen communication with automatic translation between speech and sign language.</p>' +
+      '<h1 class="page-title">Live Conversation</h1>' +
+      '<p class="page-desc">Real-time split-screen communication. Messages are translated through the backend translation API.</p>' +
       "</div>" +
       '<div style="display:flex;flex-wrap:wrap;gap:1rem;margin-bottom:1.5rem;align-items:center">' +
       '<div class="form-group" style="margin:0;min-width:200px">' +
       '<label class="form-label" for="lang-select">Language</label>' +
       '<select class="form-select" id="lang-select">' +
       '<option value="en-asl">English → ASL</option>' +
-      '<option value="en-bsl">English → BSL</option>' +
-      '<option value="es-asl">Spanish → ASL</option>' +
-      '<option value="fr-lsf">French → LSF</option>' +
+      '<option value="en-es">English → Spanish</option>' +
+      '<option value="en-fr">English → French</option>' +
       "</select></div>" +
       '<span class="badge badge-success" id="live-status">● Connected</span>' +
       '<button class="btn btn-ghost btn-sm" id="clear-chat" type="button">Clear history</button>' +
@@ -24,9 +23,7 @@ EnablerViews.live = {
       '<div class="chat-panel">' +
       '<div class="chat-panel-header"><span>🗣️ Speaker A</span><span class="badge">Speech</span></div>' +
       '<div class="chat-messages" id="chat-left">' +
-      renderMessages(messages.filter(function (m) {
-        return m.side === "left";
-      })) +
+      renderMessages(messages.filter(function (m) { return m.side === "left"; })) +
       "</div>" +
       '<div class="chat-input-row">' +
       '<input class="form-input" id="input-left" type="text" placeholder="Type a message..." aria-label="Speaker A message" />' +
@@ -35,9 +32,7 @@ EnablerViews.live = {
       '<div class="chat-panel">' +
       '<div class="chat-panel-header"><span>🤟 Speaker B</span><span class="badge">Sign → Text</span></div>' +
       '<div class="chat-messages" id="chat-right">' +
-      renderMessages(messages.filter(function (m) {
-        return m.side === "right";
-      })) +
+      renderMessages(messages.filter(function (m) { return m.side === "right"; })) +
       "</div>" +
       '<div class="chat-input-row">' +
       '<input class="form-input" id="input-right" type="text" placeholder="Type sign translation..." aria-label="Speaker B message" />' +
@@ -47,25 +42,17 @@ EnablerViews.live = {
   },
 
   init: function (root) {
-    var translations = {
-      "en-asl": { left: "→ ASL", right: "→ English" },
-      "en-bsl": { left: "→ BSL", right: "→ English" },
-      "es-asl": { left: "→ ASL", right: "→ Spanish" },
-      "fr-lsf": { left: "→ LSF", right: "→ French" },
+    var langMap = {
+      "en-asl": { direction: "speech-to-sign", source: "en", target: "asl", label: "ASL" },
+      "en-es": { direction: "text-to-text", source: "en", target: "es", label: "Spanish" },
+      "en-fr": { direction: "text-to-text", source: "en", target: "fr", label: "French" },
     };
-
-    var mockReplies = [
-      "Nice to meet you!",
-      "I understand, thank you.",
-      "Could you repeat that?",
-      "That makes sense.",
-      "Let me sign that back to you.",
-    ];
 
     function sendMessage(side, text) {
       if (!text.trim()) return;
 
       var lang = root.querySelector("#lang-select").value;
+      var config = langMap[lang] || langMap["en-asl"];
       var allMessages = EnablerState.get("liveMessages") || [];
 
       allMessages.push({
@@ -75,60 +62,64 @@ EnablerViews.live = {
         translated: false,
       });
 
-      var container = root.querySelector(
-        side === "left" ? "#chat-left" : "#chat-right"
-      );
+      var container = root.querySelector(side === "left" ? "#chat-left" : "#chat-right");
       appendBubble(container, text.trim(), "sent");
-
       EnablerState.set("liveMessages", allMessages);
 
-      setTimeout(function () {
-        var replySide = side === "left" ? "right" : "left";
-        var replyContainer = root.querySelector(
-          replySide === "left" ? "#chat-left" : "#chat-right"
-        );
-        var reply =
-          mockReplies[Math.floor(Math.random() * mockReplies.length)] +
-          " " +
-          (translations[lang]
-            ? translations[lang][replySide === "left" ? "left" : "right"]
-            : "");
+      var replySide = side === "left" ? "right" : "left";
+      var replyContainer = root.querySelector(replySide === "left" ? "#chat-left" : "#chat-right");
+      appendBubble(replyContainer, "Processing…", "received processing");
 
-        appendBubble(replyContainer, reply, "received");
+      EnablerAPI.translate(text.trim(), config.direction, config.source, config.target, {
+        enhance: config.direction === "text-to-text",
+      })
+        .then(function (result) {
+          var bubbles = replyContainer.querySelectorAll(".chat-bubble.processing");
+          bubbles.forEach(function (b) { b.remove(); });
 
-        allMessages = EnablerState.get("liveMessages") || [];
-        allMessages.push({
-          side: replySide,
-          text: reply,
-          time: new Date().toISOString(),
-          translated: true,
+          var reply =
+            config.direction === "speech-to-sign"
+              ? result.translatedText
+              : result.translatedText;
+
+          appendBubble(replyContainer, reply, "received");
+
+          allMessages = EnablerState.get("liveMessages") || [];
+          allMessages.push({
+            side: replySide,
+            text: reply,
+            confidence: result.confidence,
+            time: new Date().toISOString(),
+            translated: true,
+          });
+          EnablerState.set("liveMessages", allMessages);
+          EnablerToast.info(
+            "Translation complete",
+            Math.round(result.confidence * 100) + "% confidence · " + config.label,
+          );
+        })
+        .catch(function (err) {
+          var bubbles = replyContainer.querySelectorAll(".chat-bubble.processing");
+          bubbles.forEach(function (b) { b.remove(); });
+          EnablerToast.error("Translation failed", err.message);
         });
-        EnablerState.set("liveMessages", allMessages);
-        EnablerToast.info("Translation received", "Real-time mock translation delivered.");
-      }, 1200);
     }
 
     root.querySelector("#send-left").addEventListener("click", function () {
-      var input = root.querySelector("#input-left");
-      sendMessage("left", input.value);
-      input.value = "";
+      sendMessage("left", root.querySelector("#input-left").value);
+      root.querySelector("#input-left").value = "";
     });
 
     root.querySelector("#send-right").addEventListener("click", function () {
-      var input = root.querySelector("#input-right");
-      sendMessage("right", input.value);
-      input.value = "";
+      sendMessage("right", root.querySelector("#input-right").value);
+      root.querySelector("#input-right").value = "";
     });
 
     ["#input-left", "#input-right"].forEach(function (sel) {
       root.querySelector(sel).addEventListener("keydown", function (e) {
         if (e.key === "Enter") {
           e.preventDefault();
-          if (sel === "#input-left") {
-            root.querySelector("#send-left").click();
-          } else {
-            root.querySelector("#send-right").click();
-          }
+          root.querySelector(sel === "#input-left" ? "#send-left" : "#send-right").click();
         }
       });
     });
@@ -138,10 +129,6 @@ EnablerViews.live = {
       root.querySelector("#chat-left").innerHTML = emptyChat();
       root.querySelector("#chat-right").innerHTML = emptyChat();
       EnablerToast.info("Chat cleared");
-    });
-
-    root.querySelector("#lang-select").addEventListener("change", function () {
-      EnablerToast.info("Language updated", "Translation direction changed.");
     });
   },
 };
@@ -155,6 +142,7 @@ function renderMessages(messages) {
         (m.translated === false ? "sent" : "received") +
         '">' +
         escapeHtml(m.text) +
+        (m.confidence ? '<br><small style="opacity:0.7">' + Math.round(m.confidence * 100) + "% confidence</small>" : "") +
         "</div>"
       );
     })
@@ -162,9 +150,7 @@ function renderMessages(messages) {
 }
 
 function appendBubble(container, text, type) {
-  if (container.querySelector(".empty-state")) {
-    container.innerHTML = "";
-  }
+  if (container.querySelector(".empty-state")) container.innerHTML = "";
   var bubble = document.createElement("div");
   bubble.className = "chat-bubble " + type;
   bubble.textContent = text;

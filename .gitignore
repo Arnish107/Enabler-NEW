@@ -1,7 +1,11 @@
 # dependencies
 node_modules/
 
-# build output
+# next.js
+.next/
+out/
+
+# build output (legacy)
 dist/
 
 # env
@@ -18,3 +22,5 @@ yarn-error.log*
 .DS_Store
 Thumbs.db
 .vercel
+*.tsbuildinfo
+next-env.d.ts

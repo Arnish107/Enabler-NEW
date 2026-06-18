@@ -1,0 +1,57 @@
+{
+  "gestures": {
+    "hand_wave": {
+      "label": "wave",
+      "primaryWord": "hello",
+      "emoji": "👋"
+    },
+    "hand_raise": {
+      "label": "raised hand",
+      "primaryWord": "help",
+      "emoji": "🙋"
+    },
+    "thumbs_up": {
+      "label": "thumbs up",
+      "primaryWord": "yes",
+      "emoji": "👍"
+    },
+    "thumbs_down": {
+      "label": "thumbs down",
+      "primaryWord": "no",
+      "emoji": "👎"
+    },
+    "open_palm": {
+      "label": "open palm",
+      "primaryWord": "stop",
+      "emoji": "✋"
+    },
+    "fist": {
+      "label": "closed fist",
+      "primaryWord": "wait",
+      "emoji": "✊"
+    },
+    "point": {
+      "label": "pointing",
+      "primaryWord": "you",
+      "emoji": "👉"
+    }
+  },
+  "wordToGestures": {
+    "hello": ["hand_wave"],
+    "hi": ["hand_wave"],
+    "goodbye": ["hand_wave"],
+    "help": ["hand_raise"],
+    "please": ["hand_raise"],
+    "yes": ["thumbs_up"],
+    "good": ["thumbs_up"],
+    "okay": ["thumbs_up"],
+    "no": ["thumbs_down"],
+    "stop": ["open_palm"],
+    "wait": ["fist"],
+    "you": ["point"],
+    "thank": ["hand_wave"],
+    "thanks": ["hand_wave"],
+    "medical": ["hand_raise"],
+    "emergency": ["hand_raise"]
+  }
+}
