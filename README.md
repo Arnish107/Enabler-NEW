@@ -1,39 +1,57 @@
 # Enabler
 
-Production-ready **Next.js 15** accessibility platform. Copy this folder into a GitHub repo named `enabler` and deploy to Vercel.
+**Enabler** is an AI-powered accessibility platform that breaks communication barriers through speech, sign language, and live conversation tools.
+
+This repository is a static site ready to deploy on [Vercel](https://vercel.com).
 
 ## Quick Start
 
 ```bash
 npm install
-cp .env.example .env.local
-# Set JWT_SECRET (min 32 chars) and DATABASE_URL (optional)
 npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) to preview the site locally.
+
+## Build
+
+```bash
 npm run build
 ```
 
+The build copies static assets into `dist/` for deployment.
+
 ## Deploy to Vercel
 
-1. Push to `github.com/YOUR_USERNAME/enabler`
-2. Import repo at [vercel.com/new](https://vercel.com/new)
-3. Add env vars: `JWT_SECRET`, `DATABASE_URL` (optional)
-4. Click Deploy
+1. Push this repository to GitHub.
+2. Go to [vercel.com/new](https://vercel.com/new) and import the repository.
+3. Vercel will auto-detect the settings from `vercel.json`:
+   - **Build Command:** `npm run build`
+   - **Output Directory:** `dist`
+4. Click **Deploy**.
+
+No environment variables are required for the static landing page. Copy `.env.example` to `.env` only if you add API integrations later.
+
+## Project Structure
+
+```
+├── index.html        # Landing page
+├── css/styles.css    # Styles
+├── js/main.js        # Client-side scripts
+├── scripts/build.js  # Build script (copies to dist/)
+├── vercel.json       # Vercel deployment config
+└── package.json
+```
+
+## Features
+
+- Speech to Sign Translation
+- Sign to Text Translation
+- Live Conversations
+- Video Translation
+- Sound Alerts
+- Emergency Communication
 
 ## Stack
 
-Next.js 15 · TypeScript · Tailwind CSS · shadcn/ui · Prisma · Vercel Serverless
-
-## API Routes
-
-| Route | Method | Description |
-|-------|--------|-------------|
-| `/api/speech` | POST | Speech-to-text |
-| `/api/sign` | POST | Sign recognition |
-| `/api/translate` | POST | Translation |
-| `/api/upload` | POST | Video upload |
-| `/api/alerts` | GET/POST | Sound alerts |
-| `/api/health` | GET | Health check |
-
-## All Project Files
-
-See `GENERATED_FILES/` for every file in `FILE: path` format ready to copy.
+HTML · CSS · JavaScript · Vercel Static Hosting
