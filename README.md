@@ -70,7 +70,9 @@ npm run build
 npm start
 ```
 
-Deploy to Vercel as a Next.js project. Set `OPENAI_API_KEY` in Vercel environment variables if desired.
+Deploy to Vercel as a Next.js project. **Do not set an Output Directory** — leave it blank in Vercel project settings so Vercel uses `.next` automatically. If you see `output directory "dist" was not found`, go to **Project Settings → General → Build & Development Settings** and clear the Output Directory field.
+
+Set `OPENAI_API_KEY` in Vercel environment variables if desired.
 
 ## Project Structure
 
