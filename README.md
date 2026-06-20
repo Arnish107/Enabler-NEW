@@ -66,11 +66,27 @@ Without an API key, the system uses **structured deterministic fallback** logic 
 ## Build & Deploy
 
 ```bash
+npm install
 npm run build
 npm start
 ```
 
-Deploy to Vercel as a Next.js project. Set `OPENAI_API_KEY` in Vercel environment variables if desired.
+Next.js outputs to `.next/` — **not** `dist/`.
+
+### Deploy to Vercel
+
+This is a **Next.js 15 App Router** project. Use these settings in the Vercel dashboard (**Settings → General → Build & Development Settings**):
+
+| Setting | Value |
+|---------|-------|
+| Framework Preset | **Next.js** |
+| Build Command | `npm run build` (or leave default) |
+| Install Command | `npm install` (or leave default) |
+| **Output Directory** | **(leave blank)** |
+
+Do **not** set Output Directory to `dist`, `build`, or `out`. If you see the error `The Next.js output directory "dist" was not found`, clear the Output Directory field and redeploy.
+
+Set `OPENAI_API_KEY` in Vercel environment variables if desired.
 
 ## Project Structure
 
