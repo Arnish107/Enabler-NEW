@@ -1,12 +1,41 @@
 import type { Metadata } from "next";
-import Script from "next/script";
+import { Inter, Space_Grotesk } from "next/font/google";
+import { Providers } from "@/components/providers";
+import { SplashScreen } from "@/components/splash-screen";
 import "./globals.css";
 
+const geistSans = Inter({
+  subsets: ["latin"],
+  variable: "--font-geist-sans",
+});
+
+const display = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-display",
+});
+
 export const metadata: Metadata = {
-  title: "Enabler — AI Accessibility Tools",
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL || "https://enabler.app",
+  ),
+  title: {
+    default: "Enabler — Breaking Communication Barriers Through AI",
+    template: "%s · Enabler",
+  },
   description:
-    "Breaking communication barriers through AI accessibility tools for speech, sign language, and live conversations.",
-  icons: { icon: "/assets/favicon.svg" },
+    "AI-powered accessibility platform for speech-to-sign, sign-to-text, live conversation, and emergency communication.",
+  openGraph: {
+    title: "Enabler",
+    description: "Breaking Communication Barriers Through AI",
+    type: "website",
+    images: ["/assets/logo-brand.png"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Enabler",
+    description: "Breaking Communication Barriers Through AI",
+  },
+  robots: { index: true, follow: true },
 };
 
 export default function RootLayout({
@@ -16,37 +45,14 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-          rel="stylesheet"
-        />
-        <link rel="stylesheet" href="/css/styles.css" />
-      </head>
-      <body>
-        {children}
-        <Script src="/js/utils/state.js" strategy="beforeInteractive" />
-        <Script src="/js/utils/toast.js" strategy="beforeInteractive" />
-        <Script src="/js/utils/api.js" strategy="beforeInteractive" />
-        <Script src="/js/utils/ui-states.js" strategy="beforeInteractive" />
-        <Script src="/js/utils/pipeline-ui.js" strategy="beforeInteractive" />
-        <Script src="/js/utils/speech-engine.js" strategy="lazyOnload" />
-        <Script src="/js/utils/sign-engine.js" strategy="lazyOnload" />
-        <Script src="/js/router.js" strategy="afterInteractive" />
-        <Script src="/js/views/home.js" strategy="afterInteractive" />
-        <Script src="/js/views/speech-sign.js" strategy="afterInteractive" />
-        <Script src="/js/views/sign-text.js" strategy="afterInteractive" />
-        <Script src="/js/views/live.js" strategy="afterInteractive" />
-        <Script src="/js/views/video.js" strategy="afterInteractive" />
-        <Script src="/js/views/emergency.js" strategy="afterInteractive" />
-        <Script src="/js/views/alerts.js" strategy="afterInteractive" />
-        <Script src="/js/app.js" strategy="afterInteractive" />
+      <body className={`${geistSans.variable} ${display.variable} font-sans`}>
+        <Providers>
+          <a href="#main" className="skip-link">
+            Skip to main content
+          </a>
+          <SplashScreen />
+          {children}
+        </Providers>
       </body>
     </html>
   );

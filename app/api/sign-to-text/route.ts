@@ -1,85 +1,57 @@
 import { NextRequest, NextResponse } from "next/server";
-import { processSignFrames } from "@/lib/sign-to-text";
-import { processWithAI } from "@/lib/ai-process";
+import { chatCompletion, hasOpenAI } from "@/lib/openai";
+import { processSignFrames } from "@/lib/sign-classifier";
+import { addHistory } from "@/lib/history-store";
 import type { FrameInput } from "@/lib/types";
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { frames, enhance = true } = body as {
-      frames: FrameInput[];
-      enhance?: boolean;
-    };
+    const frames = body.frames as FrameInput[] | undefined;
 
-    if (!frames || !Array.isArray(frames) || frames.length === 0) {
+    if (!frames?.length) {
       return NextResponse.json(
         {
-          error: "Missing frames",
-          message:
-            "Provide an array of video frames with hand landmarks from MediaPipe.",
+          error: "missing_frames",
+          message: "Provide MediaPipe hand landmark frames.",
         },
         { status: 400 },
       );
     }
 
-    const validFrames = frames.filter(
-      (f) => f.landmarks && Array.isArray(f.landmarks) && f.landmarks.length >= 21,
-    );
+    const classified = processSignFrames(frames);
+    let text = classified.text;
 
-    if (validFrames.length === 0) {
-      return NextResponse.json(
-        {
-          error: "No hand data",
-          message:
-            "No valid hand landmarks detected. Ensure hands are visible in the video.",
-          text: "No recognizable signs detected. Please ensure your hands are visible to the camera.",
-          confidence: 0,
-          gestures: [],
-          pipeline: [
-            { id: "input", label: "Video input received", status: "complete" },
-            {
-              id: "frames",
-              label: "Frame extraction",
-              status: "complete",
-              detail: `${frames.length} frames, 0 with hands`,
-            },
-            {
-              id: "tracking",
-              label: "Hand landmark tracking",
-              status: "error",
-              detail: "No hands detected",
-            },
-          ],
-          source: "gesture-classifier",
-        },
-        { status: 200 },
+    if (hasOpenAI() && classified.gestures.length > 0) {
+      const words = classified.gestures.map((g) => g.word).join(", ");
+      const enhanced = await chatCompletion(
+        "You convert detected ASL gesture words into one natural, grammatical English sentence for an accessibility app. Return only the sentence.",
+        `Gesture words: ${words}`,
+        { temperature: 0.2 },
       );
+      if (enhanced) text = enhanced;
     }
 
-    const result = processSignFrames(validFrames);
+    addHistory({
+      type: "sign-text",
+      title: "Sign → Text",
+      content: text,
+      meta: {
+        confidence: classified.confidence,
+        gestures: classified.gestures,
+      },
+    });
 
-    if (enhance && result.gestures.length > 0) {
-      const gestureWords = result.gestures.map((g) => g.word).filter(Boolean);
-      const enhanced = await processWithAI(
-        result.text,
-        "map-gestures",
-        { gestures: gestureWords },
-      );
-      result.text = enhanced.result;
-      result.confidence = Math.max(result.confidence, enhanced.confidence);
-      result.pipeline.push({
-        id: "ai-enhance",
-        label: "AI sentence assembly",
-        status: "complete",
-        detail: enhanced.source,
-      });
-    }
-
-    return NextResponse.json(result);
-  } catch {
-    return NextResponse.json(
-      { error: "Processing failed", message: "Could not process sign input." },
-      { status: 500 },
-    );
+    return NextResponse.json({
+      text,
+      confidence: classified.confidence,
+      gestures: classified.gestures,
+      pipeline: classified.pipeline,
+      source: hasOpenAI() ? "mediapipe+openai" : "mediapipe",
+    });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Sign processing failed";
+    return NextResponse.json({ error: "failed", message }, { status: 500 });
   }
 }

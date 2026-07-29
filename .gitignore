@@ -5,10 +5,7 @@ node_modules/
 .next/
 out/
 
-# build output (legacy)
-dist/
-
-# env
+# env — never commit secrets
 .env
 .env.local
 .env.*.local
@@ -24,3 +21,6 @@ Thumbs.db
 .vercel
 *.tsbuildinfo
 next-env.d.ts
+
+# legacy static build
+dist/

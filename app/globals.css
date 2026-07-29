@@ -1,3 +1,92 @@
-body {
-  margin: 0;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 220 40% 98%;
+    --foreground: 226 45% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 226 45% 10%;
+    --primary: 239 100% 65%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 30% 96%;
+    --secondary-foreground: 226 35% 20%;
+    --muted: 220 25% 94%;
+    --muted-foreground: 220 12% 42%;
+    --accent: 239 100% 65%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 20% 90%;
+    --input: 220 20% 90%;
+    --ring: 239 100% 65%;
+    --cyan: 187 92% 55%;
+    --cyan-foreground: 226 45% 10%;
+    --emerald: 160 84% 39%;
+    --purple: 262 83% 65%;
+    --radius: 1rem;
+  }
+
+  .dark {
+    --background: 230 40% 6%;
+    --foreground: 210 40% 98%;
+    --card: 230 35% 9%;
+    --card-foreground: 210 40% 98%;
+    --primary: 239 100% 68%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 230 30% 14%;
+    --secondary-foreground: 210 40% 96%;
+    --muted: 230 25% 14%;
+    --muted-foreground: 220 15% 65%;
+    --accent: 239 100% 68%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 230 20% 18%;
+    --input: 230 20% 18%;
+    --ring: 239 100% 68%;
+    --cyan: 187 92% 55%;
+    --cyan-foreground: 230 40% 6%;
+    --emerald: 160 84% 45%;
+    --purple: 262 83% 70%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  ::selection {
+    @apply bg-primary/25;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .glass {
+    @apply border border-white/10 bg-white/60 shadow-glass backdrop-blur-2xl dark:bg-white/5;
+  }
+
+  .gradient-mesh {
+    background:
+      radial-gradient(ellipse 80% 50% at 20% -10%, hsl(239 100% 65% / 0.18), transparent),
+      radial-gradient(ellipse 60% 40% at 90% 10%, hsl(187 92% 55% / 0.12), transparent),
+      radial-gradient(ellipse 50% 30% at 50% 100%, hsl(262 83% 65% / 0.08), transparent);
+  }
+
+  .skip-link {
+    @apply absolute left-4 top-[-100%] z-[100] rounded-lg bg-primary px-4 py-2 text-primary-foreground focus:top-4;
+  }
 }

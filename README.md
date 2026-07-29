@@ -1,107 +1,87 @@
 # Enabler
 
-**Enabler** is an API-driven accessibility platform with real backend processing for speech, sign language, and translation.
+**Enabler** is an AI-powered accessibility platform that helps deaf and hearing people communicate through speech-to-sign, sign-to-text, live conversation translation, video translation, emergency cards, and an AI assistant.
 
-## Architecture
-
-```
-Browser (public/js)              Next.js API (app/api/)
-├── Web Speech API          →    POST /api/speech-to-text
-├── MediaPipe Hands         →    POST /api/sign-to-text
-├── Feature views           →    POST /api/translate
-└── AI enhancement          →    POST /api/ai-process
-```
-
-All intelligence runs server-side. The frontend only captures input and renders API responses.
-
-## API Endpoints
-
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `/api/health` | GET | Service status & capabilities |
-| `/api/speech-to-text` | POST | Transcript validation + AI enhancement |
-| `/api/sign-to-text` | POST | Gesture classification → text |
-| `/api/translate` | POST | Sign mapping & language translation |
-| `/api/ai-process` | POST | AI text enhancement (OpenAI or fallback) |
-
-### Example: Speech → Sign
-
-```bash
-# 1. Validate transcript
-curl -X POST http://localhost:3000/api/speech-to-text \
-  -H "Content-Type: application/json" \
-  -d '{"transcript": "hello I need help", "language": "en-US"}'
-
-# 2. Map to signs
-curl -X POST http://localhost:3000/api/translate \
-  -H "Content-Type: application/json" \
-  -d '{"text": "hello I need help", "direction": "speech-to-sign"}'
-```
-
-## Quick Start
-
-```bash
-npm install
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000)
-
-## Optional: OpenAI Enhancement
-
-Add to `.env.local`:
-
-```
-OPENAI_API_KEY=sk-...
-```
-
-This enables:
-- Whisper server-side audio STT (when audio is sent)
-- GPT-powered transcript cleaning
-- Improved gesture-to-sentence assembly
-- Enhanced translations
-
-Without an API key, the system uses **structured deterministic fallback** logic — never random output.
-
-## Build & Deploy
-
-```bash
-npm install
-npm run build
-npm start
-```
-
-Next.js outputs to `.next/` — **not** `dist/`.
-
-### Deploy to Vercel
-
-This is a **Next.js 15 App Router** project. Use these settings in the Vercel dashboard (**Settings → General → Build & Development Settings**):
-
-| Setting | Value |
-|---------|-------|
-| Framework Preset | **Next.js** |
-| Build Command | `npm run build` (or leave default) |
-| Install Command | `npm install` (or leave default) |
-| **Output Directory** | **(leave blank)** |
-
-Do **not** set Output Directory to `dist`, `build`, or `out`. If you see the error `The Next.js output directory "dist" was not found`, clear the Output Directory field and redeploy.
-
-Set `OPENAI_API_KEY` in Vercel environment variables if desired.
-
-## Project Structure
-
-```
-app/api/           # Serverless API routes
-lib/               # Backend processing logic
-  data/            # Gesture dictionary & sign mapping
-  sign-classifier.ts
-  speech-processor.ts
-  translate.ts
-  ai-process.ts
-  openai.ts
-public/            # Frontend SPA (UI only)
-```
+> Breaking Communication Barriers Through AI
 
 ## Stack
 
-Next.js 15 · TypeScript · MediaPipe Hands · Web Speech API · OpenAI (optional) · Vercel Serverless
+Next.js 15 · TypeScript · Tailwind CSS · Framer Motion · OpenAI · MediaPipe Hands · Web Speech API · Vercel
+
+## Setup
+
+```bash
+npm install
+cp .env.example .env.local
+```
+
+Add your OpenAI key to `.env.local`:
+
+```
+OPENAI_API_KEY=sk-...
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
+
+Never commit `.env.local`. The key is server-side only.
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000).
+
+## Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Local development |
+| `npm run build` | Production build (outputs `.next/`) |
+| `npm start` | Run production server |
+| `npm run lint` | ESLint |
+| `npm run typecheck` | TypeScript check |
+
+## API Routes
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/health` | GET | Health + OpenAI status |
+| `/api/speech-to-text` | POST | Transcript cleanup + sign mapping |
+| `/api/sign-to-text` | POST | MediaPipe landmarks → text |
+| `/api/translate` | POST | Multi-language / ASL gloss |
+| `/api/conversation` | POST | Live conversation translation |
+| `/api/ai-process` | POST | Assist / simplify / enhance / suggest |
+| `/api/history` | GET/POST | Session history |
+
+## Deploy to Vercel
+
+1. Push to GitHub
+2. Import the repo in Vercel
+3. Framework: **Next.js**
+4. **Output Directory: leave blank** (uses `.next`, never `dist`)
+5. Add `OPENAI_API_KEY` in Environment Variables
+6. Deploy
+
+`vercel.json` is minimal:
+
+```json
+{ "framework": "nextjs" }
+```
+
+## Features
+
+- Splash intro → marketing homepage
+- Accessibility dashboard with sidebar
+- Speech → Sign (Web Speech + OpenAI)
+- Sign → Text (MediaPipe + OpenAI)
+- Live conversation (20 languages)
+- Video translation
+- Emergency cards
+- Sound alerts UI
+- AI assistant
+- History & settings (theme, contrast, reduced motion)
+
+## Security
+
+- API keys only via `process.env.OPENAI_API_KEY`
+- No keys in client bundles
+- Graceful 503 when key is missing

@@ -1,77 +1,81 @@
 import { NextRequest, NextResponse } from "next/server";
-import { processSpeechInput } from "@/lib/speech-processor";
-import { processWithAI } from "@/lib/ai-process";
-import { transcribeAudioBase64, hasOpenAI } from "@/lib/openai";
+import { chatCompletion, hasOpenAI, transcribeAudio } from "@/lib/openai";
+import { addHistory } from "@/lib/history-store";
+import { mapTextToSigns } from "@/lib/sign-mapping";
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const {
-      transcript,
-      language = "en-US",
-      audio,
-      mimeType = "audio/webm",
-      enhance = true,
-    } = body;
-
-    if (!transcript && !audio) {
+    if (!hasOpenAI()) {
       return NextResponse.json(
         {
-          error: "Missing input",
-          message: "Provide a transcript from Web Speech API or base64 audio data.",
+          error: "missing_key",
+          message:
+            "OPENAI_API_KEY is not configured. Add it to .env.local or Vercel environment variables.",
         },
+        { status: 503 },
+      );
+    }
+
+    const contentType = request.headers.get("content-type") || "";
+    let transcript = "";
+    let language = "en";
+
+    if (contentType.includes("multipart/form-data")) {
+      const form = await request.formData();
+      const audio = form.get("audio");
+      language = String(form.get("language") || "en");
+      const textField = form.get("transcript");
+
+      if (typeof textField === "string" && textField.trim()) {
+        transcript = textField.trim();
+      } else if (audio instanceof Blob) {
+        const buffer = Buffer.from(await audio.arrayBuffer());
+        transcript = await transcribeAudio(buffer, "speech.webm");
+      }
+    } else {
+      const body = await request.json();
+      language = body.language || "en";
+      if (body.transcript) {
+        transcript = String(body.transcript).trim();
+      } else if (body.audio) {
+        const buffer = Buffer.from(body.audio, "base64");
+        transcript = await transcribeAudio(buffer);
+      }
+    }
+
+    if (!transcript) {
+      return NextResponse.json(
+        { error: "missing_input", message: "Provide transcript or audio." },
         { status: 400 },
       );
     }
 
-    let rawTranscript = transcript ?? "";
-    let source: "web-speech" | "audio-processing" = "web-speech";
-    let audioConfidence = 0.85;
+    const cleaned = await chatCompletion(
+      "You clean speech transcripts for an accessibility app. Return only the cleaned, punctuated transcript. Keep the original language. Do not add commentary.",
+      transcript,
+      { temperature: 0.1 },
+    );
 
-    if (audio && !transcript) {
-      if (!hasOpenAI()) {
-        return NextResponse.json(
-          {
-            error: "Audio processing unavailable",
-            message:
-              "Server-side audio STT requires OPENAI_API_KEY. Use browser Web Speech API and send the transcript field, or configure OpenAI for Whisper.",
-            fallback: true,
-          },
-          { status: 422 },
-        );
-      }
+    const finalText = cleaned || transcript;
+    const signs = mapTextToSigns(finalText);
 
-      const whisper = await transcribeAudioBase64(audio, mimeType);
-      rawTranscript = whisper.transcript;
-      audioConfidence = whisper.confidence;
-      source = "audio-processing";
-    }
+    addHistory({
+      type: "speech-sign",
+      title: "Speech → Sign",
+      content: finalText,
+      meta: { language, signs },
+    });
 
-    const result = processSpeechInput(rawTranscript, language, source);
-    result.confidence = Math.max(result.confidence, audioConfidence);
-
-    if (enhance && rawTranscript.trim()) {
-      const enhanced = await processWithAI(rawTranscript, "enhance-transcript");
-      result.transcript = enhanced.result;
-      result.confidence = Math.max(
-        result.confidence,
-        enhanced.confidence,
-      );
-      result.pipeline.push({
-        id: "ai-enhance",
-        label: "AI transcript enhancement",
-        status: "complete",
-        detail: enhanced.source,
-      });
-    }
-
-    return NextResponse.json(result);
+    return NextResponse.json({
+      transcript: finalText,
+      confidence: 0.92,
+      language,
+      signs,
+      source: "openai",
+    });
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Could not process speech input.";
-    return NextResponse.json(
-      { error: "Processing failed", message },
-      { status: 500 },
-    );
+      error instanceof Error ? error.message : "Speech processing failed";
+    return NextResponse.json({ error: "failed", message }, { status: 500 });
   }
 }

@@ -1,66 +1,58 @@
-export async function callChatCompletion(
-  prompt: string,
-  apiKey: string,
-): Promise<string> {
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "gpt-4o-mini",
-      messages: [{ role: "user", content: prompt }],
-      temperature: 0.2,
-      max_tokens: 600,
-    }),
-  });
+import OpenAI from "openai";
+import { toFile } from "openai";
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`OpenAI API error: ${errorText}`);
+export function getOpenAIClient(): OpenAI | null {
+  const key = process.env.OPENAI_API_KEY;
+  if (!key || key.includes("YOUR_OPENAI") || key.includes("PASTE_YOUR")) {
+    return null;
   }
-
-  const data = (await response.json()) as {
-    choices?: Array<{ message?: { content?: string } }>;
-  };
-
-  return data.choices?.[0]?.message?.content?.trim() ?? "";
-}
-
-export async function transcribeAudioBase64(
-  audioBase64: string,
-  mimeType = "audio/webm",
-): Promise<{ transcript: string; confidence: number }> {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    throw new Error("OPENAI_API_KEY not configured for server-side audio STT");
-  }
-
-  const buffer = Buffer.from(audioBase64, "base64");
-  const formData = new FormData();
-  const blob = new Blob([buffer], { type: mimeType });
-  formData.append("file", blob, "audio.webm");
-  formData.append("model", "whisper-1");
-
-  const response = await fetch("https://api.openai.com/v1/audio/transcriptions", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}` },
-    body: formData,
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Whisper API error: ${errorText}`);
-  }
-
-  const data = (await response.json()) as { text?: string };
-  return {
-    transcript: data.text?.trim() ?? "",
-    confidence: 0.92,
-  };
+  return new OpenAI({ apiKey: key });
 }
 
 export function hasOpenAI(): boolean {
-  return Boolean(process.env.OPENAI_API_KEY);
+  const key = process.env.OPENAI_API_KEY;
+  return Boolean(
+    key && !key.includes("YOUR_OPENAI") && !key.includes("PASTE_YOUR"),
+  );
+}
+
+export async function chatCompletion(
+  system: string,
+  user: string,
+  options?: { temperature?: number; json?: boolean },
+): Promise<string> {
+  const client = getOpenAIClient();
+  if (!client) {
+    throw new Error("OPENAI_API_KEY is not configured");
+  }
+
+  const response = await client.chat.completions.create({
+    model: "gpt-4o-mini",
+    temperature: options?.temperature ?? 0.3,
+    response_format: options?.json ? { type: "json_object" } : undefined,
+    messages: [
+      { role: "system", content: system },
+      { role: "user", content: user },
+    ],
+  });
+
+  return response.choices[0]?.message?.content?.trim() ?? "";
+}
+
+export async function transcribeAudio(
+  buffer: Buffer,
+  filename = "audio.webm",
+): Promise<string> {
+  const client = getOpenAIClient();
+  if (!client) {
+    throw new Error("OPENAI_API_KEY is not configured");
+  }
+
+  const file = await toFile(buffer, filename);
+  const result = await client.audio.transcriptions.create({
+    file,
+    model: "whisper-1",
+  });
+
+  return result.text.trim();
 }
