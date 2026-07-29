@@ -1,5 +1,6 @@
 export {
   getGeminiClient,
+  getModelName,
   hasGemini,
   hasOpenAI,
   chatCompletion,

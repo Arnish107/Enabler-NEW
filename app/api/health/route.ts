@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { hasGemini } from "@/lib/gemini";
+import { getModelName, hasGemini } from "@/lib/gemini";
 
 export async function GET() {
   return NextResponse.json({
@@ -8,7 +8,7 @@ export async function GET() {
     version: "3.0.0",
     timestamp: new Date().toISOString(),
     gemini: hasGemini(),
-    model: process.env.GEMINI_MODEL?.trim() || "gemini-2.5-flash",
+    model: getModelName(),
     // Presence only — never returns the secret value
     env: {
       GEMINI_API_KEY: Boolean(process.env.GEMINI_API_KEY?.trim()),

@@ -1,12 +1,37 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-/** gemini-2.0-flash is shut down / free-tier limit 0 — use 2.5+ */
-const DEFAULT_MODEL = "gemini-2.5-flash";
+/**
+ * Prefer models open to new Google AI Studio users.
+ * gemini-2.0-flash / gemini-2.5-flash are restricted or shut down for many accounts.
+ */
+const DEFAULT_MODEL = "gemini-3.1-flash-lite";
 
-function getModelName(): string {
+const FALLBACK_MODELS = [
+  "gemini-3.1-flash-lite",
+  "gemini-3.5-flash-lite",
+  "gemini-3.6-flash",
+  "gemini-3.5-flash",
+] as const;
+
+function isModelUnavailable(message: string): boolean {
+  return (
+    message.includes("404") ||
+    message.includes("no longer available") ||
+    message.includes("not found") ||
+    message.includes("is not found")
+  );
+}
+
+export function getModelName(): string {
   const fromEnv = process.env.GEMINI_MODEL?.trim();
   if (fromEnv) return fromEnv;
   return DEFAULT_MODEL;
+}
+
+function getModelCandidates(): string[] {
+  const preferred = getModelName();
+  const rest = FALLBACK_MODELS.filter((m) => m !== preferred);
+  return [preferred, ...rest];
 }
 
 function getApiKey(): string | null {
@@ -22,11 +47,15 @@ function getApiKey(): string | null {
   return key;
 }
 
-function formatGeminiError(error: unknown): Error {
+function formatGeminiError(error: unknown, modelTried: string): Error {
   const message = error instanceof Error ? error.message : String(error);
-  if (message.includes("429") || message.includes("quota") || message.includes("RESOURCE_EXHAUSTED")) {
+  if (
+    message.includes("429") ||
+    message.includes("quota") ||
+    message.includes("RESOURCE_EXHAUSTED")
+  ) {
     return new Error(
-      `Gemini quota exceeded for model "${getModelName()}". Wait and retry, switch GEMINI_MODEL (e.g. gemini-2.5-flash-lite), or enable billing in Google AI Studio. Original: ${message}`,
+      `Gemini quota exceeded for model "${modelTried}". Wait and retry, set GEMINI_MODEL to another model (e.g. gemini-3.5-flash-lite), or enable billing in Google AI Studio. Original: ${message}`,
     );
   }
   return error instanceof Error ? error : new Error(message);
@@ -47,6 +76,28 @@ export function hasOpenAI(): boolean {
   return hasGemini();
 }
 
+async function withModelFallback<T>(
+  run: (modelName: string) => Promise<T>,
+): Promise<T> {
+  const candidates = getModelCandidates();
+  let lastError: unknown;
+
+  for (const modelName of candidates) {
+    try {
+      return await run(modelName);
+    } catch (error) {
+      lastError = error;
+      const message = error instanceof Error ? error.message : String(error);
+      if (isModelUnavailable(message)) {
+        continue;
+      }
+      throw formatGeminiError(error, modelName);
+    }
+  }
+
+  throw formatGeminiError(lastError, candidates.join(" → "));
+}
+
 export async function chatCompletion(
   system: string,
   user: string,
@@ -57,9 +108,9 @@ export async function chatCompletion(
     throw new Error("GEMINI_API_KEY is not configured");
   }
 
-  try {
+  return withModelFallback(async (modelName) => {
     const model = client.getGenerativeModel({
-      model: getModelName(),
+      model: modelName,
       systemInstruction: system,
       generationConfig: {
         temperature: options?.temperature ?? 0.3,
@@ -69,9 +120,7 @@ export async function chatCompletion(
 
     const result = await model.generateContent(user);
     return result.response.text().trim();
-  } catch (error) {
-    throw formatGeminiError(error);
-  }
+  });
 }
 
 export async function transcribeAudio(
@@ -93,8 +142,8 @@ export async function transcribeAudio(
           ? "audio/mp4"
           : "audio/webm";
 
-  try {
-    const model = client.getGenerativeModel({ model: getModelName() });
+  return withModelFallback(async (modelName) => {
+    const model = client.getGenerativeModel({ model: modelName });
     const result = await model.generateContent([
       {
         inlineData: {
@@ -108,7 +157,5 @@ export async function transcribeAudio(
     ]);
 
     return result.response.text().trim();
-  } catch (error) {
-    throw formatGeminiError(error);
-  }
+  });
 }
