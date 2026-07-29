@@ -1,7 +1,13 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const TEXT_MODEL = "gemini-2.0-flash";
-const AUDIO_MODEL = "gemini-2.0-flash";
+/** gemini-2.0-flash is shut down / free-tier limit 0 — use 2.5+ */
+const DEFAULT_MODEL = "gemini-2.5-flash";
+
+function getModelName(): string {
+  const fromEnv = process.env.GEMINI_MODEL?.trim();
+  if (fromEnv) return fromEnv;
+  return DEFAULT_MODEL;
+}
 
 function getApiKey(): string | null {
   const raw =
@@ -14,6 +20,16 @@ function getApiKey(): string | null {
     return null;
   }
   return key;
+}
+
+function formatGeminiError(error: unknown): Error {
+  const message = error instanceof Error ? error.message : String(error);
+  if (message.includes("429") || message.includes("quota") || message.includes("RESOURCE_EXHAUSTED")) {
+    return new Error(
+      `Gemini quota exceeded for model "${getModelName()}". Wait and retry, switch GEMINI_MODEL (e.g. gemini-2.5-flash-lite), or enable billing in Google AI Studio. Original: ${message}`,
+    );
+  }
+  return error instanceof Error ? error : new Error(message);
 }
 
 export function getGeminiClient(): GoogleGenerativeAI | null {
@@ -41,17 +57,21 @@ export async function chatCompletion(
     throw new Error("GEMINI_API_KEY is not configured");
   }
 
-  const model = client.getGenerativeModel({
-    model: TEXT_MODEL,
-    systemInstruction: system,
-    generationConfig: {
-      temperature: options?.temperature ?? 0.3,
-      responseMimeType: options?.json ? "application/json" : "text/plain",
-    },
-  });
+  try {
+    const model = client.getGenerativeModel({
+      model: getModelName(),
+      systemInstruction: system,
+      generationConfig: {
+        temperature: options?.temperature ?? 0.3,
+        responseMimeType: options?.json ? "application/json" : "text/plain",
+      },
+    });
 
-  const result = await model.generateContent(user);
-  return result.response.text().trim();
+    const result = await model.generateContent(user);
+    return result.response.text().trim();
+  } catch (error) {
+    throw formatGeminiError(error);
+  }
 }
 
 export async function transcribeAudio(
@@ -73,18 +93,22 @@ export async function transcribeAudio(
           ? "audio/mp4"
           : "audio/webm";
 
-  const model = client.getGenerativeModel({ model: AUDIO_MODEL });
-  const result = await model.generateContent([
-    {
-      inlineData: {
-        mimeType,
-        data: buffer.toString("base64"),
+  try {
+    const model = client.getGenerativeModel({ model: getModelName() });
+    const result = await model.generateContent([
+      {
+        inlineData: {
+          mimeType,
+          data: buffer.toString("base64"),
+        },
       },
-    },
-    {
-      text: "Transcribe this audio accurately. Return only the transcript text with no commentary.",
-    },
-  ]);
+      {
+        text: "Transcribe this audio accurately. Return only the transcript text with no commentary.",
+      },
+    ]);
 
-  return result.response.text().trim();
+    return result.response.text().trim();
+  } catch (error) {
+    throw formatGeminiError(error);
+  }
 }

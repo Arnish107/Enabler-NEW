@@ -8,6 +8,7 @@ export async function GET() {
     version: "3.0.0",
     timestamp: new Date().toISOString(),
     gemini: hasGemini(),
+    model: process.env.GEMINI_MODEL?.trim() || "gemini-2.5-flash",
     // Presence only — never returns the secret value
     env: {
       GEMINI_API_KEY: Boolean(process.env.GEMINI_API_KEY?.trim()),
