@@ -7,16 +7,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import type { FrameInput } from "@/lib/types";
-
-declare global {
-  interface Window {
-    Hands?: new (config: { locateFile: (file: string) => string }) => {
-      setOptions: (o: Record<string, unknown>) => void;
-      onResults: (cb: (results: { multiHandLandmarks?: Array<Array<{ x: number; y: number; z: number }>> }) => void) => void;
-      send: (input: { image: HTMLCanvasElement | HTMLVideoElement }) => Promise<void>;
-    };
-  }
-}
+import {
+  detectHandsInVideo,
+  extractFramesFromVideoFile,
+  getHands,
+} from "@/lib/mediapipe-client";
 
 export default function SignPage() {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -26,8 +21,10 @@ export default function SignPage() {
   const [status, setStatus] = useState("Ready");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [gestures, setGestures] = useState<Array<{ label: string; confidence: number }>>([]);
-  const handsReady = useRef(false);
+  const [extracting, setExtracting] = useState(false);
+  const [gestures, setGestures] = useState<
+    Array<{ label: string; confidence: number }>
+  >([]);
 
   useEffect(() => {
     return () => {
@@ -35,101 +32,79 @@ export default function SignPage() {
     };
   }, [stream]);
 
-  async function loadHands() {
-    if (handsReady.current || window.Hands) {
-      handsReady.current = true;
-      return;
-    }
-    await new Promise<void>((resolve, reject) => {
-      const script = document.createElement("script");
-      script.src =
-        "https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.js";
-      script.onload = () => resolve();
-      script.onerror = () => reject(new Error("Failed to load MediaPipe"));
-      document.head.appendChild(script);
-    });
-    handsReady.current = true;
-  }
-
-  async function detectFromVideo(video: HTMLVideoElement): Promise<FrameInput | null> {
-    await loadHands();
-    if (!window.Hands) return null;
-    const hands = new window.Hands({
-      locateFile: (file) =>
-        `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/${file}`,
-    });
-    hands.setOptions({
-      maxNumHands: 2,
-      modelComplexity: 1,
-      minDetectionConfidence: 0.6,
-      minTrackingConfidence: 0.5,
-    });
-    return new Promise((resolve) => {
-      hands.onResults((results) => {
-        const lm = results.multiHandLandmarks?.[0];
-        if (!lm) {
-          resolve(null);
-          return;
-        }
-        resolve({
-          landmarks: lm.map((p) => ({ x: p.x, y: p.y, z: p.z })),
-          timestamp: Date.now(),
-        });
-      });
-      void hands.send({ image: video });
-    });
-  }
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !stream) return;
+    video.srcObject = stream;
+    void video.play().catch(() => undefined);
+  }, [stream]);
 
   async function openCamera() {
     setError("");
+    setStatus("Opening camera");
     try {
       const s = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: "user" },
         audio: false,
       });
       setStream(s);
-      if (videoRef.current) {
-        videoRef.current.srcObject = s;
-        await videoRef.current.play();
-      }
-      await loadHands();
+      setStatus("Loading hand tracker");
+      await getHands();
       setStatus("Camera ready");
     } catch {
       setError("Camera permission denied or unavailable.");
+      setStatus("Error");
     }
   }
 
   async function captureFrame() {
     if (!videoRef.current) return;
     setStatus("Capturing");
-    const frame = await detectFromVideo(videoRef.current);
-    if (!frame) {
-      setError("No hands detected. Position hands clearly in frame.");
-      setStatus("Ready");
-      return;
-    }
-    setFrames((prev) => [...prev, frame]);
-    setStatus(`${frames.length + 1} frame(s)`);
     setError("");
+    try {
+      const frame = await detectHandsInVideo(videoRef.current);
+      if (!frame) {
+        setError("No hands detected. Position hands clearly in frame.");
+        setStatus("Ready");
+        return;
+      }
+      setFrames((prev) => {
+        const next = [...prev, frame];
+        setStatus(`${next.length} frame(s)`);
+        return next;
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Capture failed");
+      setStatus("Error");
+    }
   }
 
   async function convert() {
-    if (!frames.length && videoRef.current) {
-      await captureFrame();
+    let payload = frames;
+
+    if (!payload.length && videoRef.current?.srcObject) {
+      setStatus("Capturing");
+      try {
+        const frame = await detectHandsInVideo(videoRef.current);
+        if (frame) {
+          payload = [frame];
+          setFrames(payload);
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Capture failed");
+        setStatus("Error");
+        return;
+      }
     }
-    const payload = frames.length
-      ? frames
-      : videoRef.current
-        ? [(await detectFromVideo(videoRef.current))].filter(Boolean)
-        : [];
 
     if (!payload.length) {
-      setError("Capture at least one frame with visible hands.");
+      setError("Capture at least one frame with visible hands, or upload a video.");
       return;
     }
 
     setLoading(true);
     setStatus("Processing");
+    setError("");
     try {
       const res = await fetch("/api/sign-to-text", {
         method: "POST",
@@ -151,26 +126,29 @@ export default function SignPage() {
 
   async function onUpload(file: File) {
     setError("");
+    setExtracting(true);
     setStatus("Loading video");
-    const url = URL.createObjectURL(file);
-    const video = document.createElement("video");
-    video.src = url;
-    video.muted = true;
-    await video.play().catch(() => undefined);
-    await new Promise<void>((r) => {
-      video.onloadeddata = () => r();
-    });
-    const captured: FrameInput[] = [];
-    const count = 6;
-    for (let i = 0; i < count; i++) {
-      video.currentTime = (video.duration || 2) * (i / count);
-      await new Promise((r) => setTimeout(r, 120));
-      const frame = await detectFromVideo(video);
-      if (frame) captured.push(frame);
+    try {
+      const captured = await extractFramesFromVideoFile(
+        file,
+        undefined,
+        (label) => setStatus(label),
+      );
+      setFrames(captured);
+      if (!captured.length) {
+        setError(
+          "No hands detected in the video. Try a clearer clip or use the live camera.",
+        );
+        setStatus("No hands found");
+        return;
+      }
+      setStatus(`${captured.length} frames extracted`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Video processing failed");
+      setStatus("Error");
+    } finally {
+      setExtracting(false);
     }
-    URL.revokeObjectURL(url);
-    setFrames(captured);
-    setStatus(`${captured.length} frames extracted`);
   }
 
   return (
@@ -178,7 +156,8 @@ export default function SignPage() {
       <div>
         <h1 className="font-display text-3xl font-bold">Sign → Text</h1>
         <p className="mt-2 text-muted-foreground">
-          Capture hand landmarks with MediaPipe, then classify and assemble sentences with AI.
+          Capture hand landmarks with MediaPipe, then classify and assemble
+          sentences with AI.
         </p>
       </div>
       <div className="grid gap-6 lg:grid-cols-2">
@@ -201,31 +180,54 @@ export default function SignPage() {
                   Camera preview
                 </div>
               )}
+              {extracting && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-background/70 text-sm">
+                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                  <span>{status}</span>
+                </div>
+              )}
             </div>
             <div className="flex flex-wrap gap-2">
-              <Button onClick={openCamera} variant="secondary">
+              <Button
+                onClick={openCamera}
+                variant="secondary"
+                disabled={extracting || loading}
+              >
                 <Camera className="h-4 w-4" /> Open Camera
               </Button>
-              <Button onClick={captureFrame} disabled={!stream}>
+              <Button
+                onClick={captureFrame}
+                disabled={!stream || extracting || loading}
+              >
                 Capture Frame
               </Button>
-              <label className="inline-flex">
+              <label className="inline-flex cursor-pointer">
                 <input
                   type="file"
-                  accept="video/mp4,video/webm,video/quicktime"
+                  accept="video/mp4,video/webm,video/quicktime,.mp4,.mov,.webm"
                   className="hidden"
+                  disabled={extracting || loading}
                   onChange={(e) => {
                     const f = e.target.files?.[0];
+                    e.target.value = "";
                     if (f) void onUpload(f);
                   }}
                 />
-                <Button variant="outline" asChild>
-                  <span>
-                    <Upload className="h-4 w-4" /> Upload
-                  </span>
-                </Button>
+                <span className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-border bg-transparent px-6 text-sm font-semibold text-foreground hover:bg-muted">
+                  {extracting ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Upload className="h-4 w-4" />
+                  )}
+                  Upload
+                </span>
               </label>
             </div>
+            <p className="text-xs text-muted-foreground">
+              {frames.length
+                ? `${frames.length} landmark frame(s) ready for conversion.`
+                : "Open the camera and capture frames, or upload a short sign video."}
+            </p>
           </CardContent>
         </Card>
         <Card>
@@ -233,7 +235,12 @@ export default function SignPage() {
             <CardTitle>Text Output</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Textarea value={text} readOnly rows={8} placeholder="Converted text…" />
+            <Textarea
+              value={text}
+              readOnly
+              rows={8}
+              placeholder="Converted text…"
+            />
             <div className="flex flex-wrap gap-2">
               {gestures.map((g, i) => (
                 <Badge key={i} variant="outline">
@@ -242,7 +249,10 @@ export default function SignPage() {
               ))}
             </div>
             <div className="flex gap-2">
-              <Button onClick={convert} disabled={loading}>
+              <Button
+                onClick={convert}
+                disabled={loading || extracting}
+              >
                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
                 Convert
               </Button>
@@ -260,7 +270,11 @@ export default function SignPage() {
                 Download
               </Button>
             </div>
-            {error && <p className="text-sm text-destructive" role="alert">{error}</p>}
+            {error && (
+              <p className="text-sm text-destructive" role="alert">
+                {error}
+              </p>
+            )}
           </CardContent>
         </Card>
       </div>

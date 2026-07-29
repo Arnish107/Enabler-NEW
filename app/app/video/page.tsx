@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { extractFramesFromVideoFile } from "@/lib/mediapipe-client";
 
 export default function VideoPage() {
   const [fileName, setFileName] = useState("");
@@ -20,64 +21,28 @@ export default function VideoPage() {
     setFileName(file.name);
     setLoading(true);
     setError("");
-    setStatus("Uploading");
-    setProgress(15);
+    setTranscript("");
+    setStatus("Loading video");
+    setProgress(8);
 
     try {
-      const url = URL.createObjectURL(file);
-      const video = document.createElement("video");
-      video.src = url;
-      video.muted = true;
-      await new Promise<void>((resolve, reject) => {
-        video.onloadeddata = () => resolve();
-        video.onerror = () => reject(new Error("Could not load video"));
-      });
-      setProgress(40);
-      setStatus("Extracting frames");
+      // Adaptive sample count (undefined → duration-based in client)
+      const frames = await extractFramesFromVideoFile(
+        file,
+        undefined,
+        (label, ratio) => {
+          setStatus(label);
+          setProgress(Math.round(8 + ratio * 72));
+        },
+      );
 
-      // Load MediaPipe and sample frames
-      if (!window.Hands) {
-        await new Promise<void>((resolve, reject) => {
-          const s = document.createElement("script");
-          s.src =
-            "https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.js";
-          s.onload = () => resolve();
-          s.onerror = () => reject(new Error("MediaPipe failed to load"));
-          document.head.appendChild(s);
-        });
-      }
-
-      const hands = new window.Hands!({
-        locateFile: (f) =>
-          `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/${f}`,
-      });
-      hands.setOptions({
-        maxNumHands: 2,
-        modelComplexity: 1,
-        minDetectionConfidence: 0.55,
-        minTrackingConfidence: 0.5,
-      });
-
-      const frames: Array<{ landmarks: Array<{ x: number; y: number; z: number }> }> = [];
-      const samples = 8;
-      for (let i = 0; i < samples; i++) {
-        video.currentTime = ((video.duration || 2) * i) / samples;
-        await new Promise((r) => setTimeout(r, 100));
-        const landmarks = await new Promise<Array<{ x: number; y: number; z: number }> | null>(
-          (resolve) => {
-            hands.onResults((results) => {
-              const lm = results.multiHandLandmarks?.[0];
-              resolve(lm ? lm.map((p) => ({ x: p.x, y: p.y, z: p.z })) : null);
-            });
-            void hands.send({ image: video });
-          },
+      if (!frames.length) {
+        throw new Error(
+          "No hands detected in the video. Try a clearer, well-lit clip with hands visible throughout.",
         );
-        if (landmarks) frames.push({ landmarks });
-        setProgress(40 + Math.round(((i + 1) / samples) * 35));
       }
-      URL.revokeObjectURL(url);
 
-      setStatus("Translating");
+      setStatus(`Translating ${frames.length} frames`);
       setProgress(85);
       const res = await fetch("/api/sign-to-text", {
         method: "POST",
@@ -85,15 +50,44 @@ export default function VideoPage() {
         body: JSON.stringify({ frames }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Failed");
+      if (!res.ok) throw new Error(data.message || "Translation failed");
 
-      const formatted = `[Video] ${file.name}\n\n${data.text}\n\nConfidence: ${Math.round((data.confidence || 0) * 100)}%`;
+      const gestures = Array.isArray(data.gestures) ? data.gestures : [];
+      if (!gestures.length || !data.confidence) {
+        setTranscript("");
+        setProgress(100);
+        setStatus("No signs found");
+        setError(
+          data.text ||
+            "Hands were found but no recognizable signs matched. Try slower, clearer gestures.",
+        );
+        return;
+      }
+
+      const gestureLine = gestures
+        .map(
+          (g: { label?: string; word?: string; confidence?: number }) =>
+            `${g.word || g.label} (${Math.round((g.confidence || 0) * 100)}%)`,
+        )
+        .join(" → ");
+
+      const formatted = [
+        `[Video] ${file.name}`,
+        "",
+        data.text,
+        "",
+        `Gestures: ${gestureLine}`,
+        `Frames with hands: ${frames.length}`,
+        `Confidence: ${Math.round((data.confidence || 0) * 100)}%`,
+      ].join("\n");
+
       setTranscript(formatted);
       setProgress(100);
       setStatus("Complete");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Processing failed");
       setStatus("Error");
+      setTranscript("");
     } finally {
       setLoading(false);
     }
@@ -104,7 +98,8 @@ export default function VideoPage() {
       <div>
         <h1 className="font-display text-3xl font-bold">Video Translation</h1>
         <p className="mt-2 text-muted-foreground">
-          Upload MP4, MOV, or WEBM. Hand landmarks are extracted and processed by the backend.
+          Upload MP4, MOV, or WEBM. Frames are sampled with MediaPipe Hands, then
+          classified into text.
         </p>
       </div>
       <div className="grid gap-6 lg:grid-cols-2">
@@ -123,8 +118,10 @@ export default function VideoPage() {
                 type="file"
                 accept="video/mp4,video/webm,video/quicktime,.mp4,.mov,.webm"
                 className="hidden"
+                disabled={loading}
                 onChange={(e) => {
                   const f = e.target.files?.[0];
+                  e.target.value = "";
                   if (f) void processFile(f);
                 }}
               />
@@ -159,7 +156,7 @@ export default function VideoPage() {
             />
             <Button
               variant="secondary"
-              disabled={!transcript}
+              disabled={!transcript || loading}
               onClick={() => {
                 const blob = new Blob([transcript], { type: "text/plain" });
                 const a = document.createElement("a");
