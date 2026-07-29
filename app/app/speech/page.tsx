@@ -8,14 +8,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { LANGUAGES } from "@/lib/languages";
-
-type SignItem = { word: string; emoji: string; label: string };
+import { AnimatedSignOutput, type AnimatedSign } from "@/components/animated-sign-output";
 
 export default function SpeechPage() {
   const [listening, setListening] = useState(false);
   const [live, setLive] = useState("");
   const [transcript, setTranscript] = useState("");
-  const [signs, setSigns] = useState<SignItem[]>([]);
+  const [signs, setSigns] = useState<AnimatedSign[]>([]);
   const [status, setStatus] = useState("Ready");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -100,7 +99,7 @@ export default function SpeechPage() {
       <div>
         <h1 className="font-display text-3xl font-bold">Speech → Sign</h1>
         <p className="mt-2 text-muted-foreground">
-          Speak into your microphone. OpenAI cleans the transcript and maps it to sign gloss.
+          Speak into your microphone. Gemini cleans the transcript and plays an animated sign sequence.
         </p>
       </div>
 
@@ -161,28 +160,10 @@ export default function SpeechPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Sign Output</CardTitle>
+            <CardTitle>Animated Sign Output</CardTitle>
           </CardHeader>
           <CardContent>
-            {signs.length === 0 ? (
-              <div className="flex min-h-[240px] items-center justify-center rounded-2xl border border-dashed border-border text-sm text-muted-foreground">
-                Sign sequence will appear here
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div className="flex min-h-[160px] items-center justify-center rounded-2xl bg-primary/5 text-6xl">
-                  {signs[0]?.emoji || "🤟"}
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {signs.map((s, i) => (
-                    <Badge key={`${s.word}-${i}`}>
-                      {s.emoji} {s.label}
-                    </Badge>
-                  ))}
-                </div>
-                <p className="text-sm text-muted-foreground">{transcript}</p>
-              </div>
-            )}
+            <AnimatedSignOutput signs={signs} transcript={transcript} />
           </CardContent>
         </Card>
       </div>
