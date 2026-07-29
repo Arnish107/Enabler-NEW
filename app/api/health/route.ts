@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { hasOpenAI } from "@/lib/openai";
+import { hasGemini } from "@/lib/gemini";
 
 export async function GET() {
   return NextResponse.json({
@@ -7,7 +7,7 @@ export async function GET() {
     service: "enabler",
     version: "3.0.0",
     timestamp: new Date().toISOString(),
-    openai: hasOpenAI(),
+    gemini: hasGemini(),
     endpoints: [
       "GET /api/health",
       "POST /api/speech-to-text",

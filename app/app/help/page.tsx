@@ -14,7 +14,7 @@ export default function HelpPage() {
           <CardTitle>Getting started</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3 text-sm text-muted-foreground">
-          <p>1. Add your OpenAI API key to `.env.local` as `OPENAI_API_KEY`.</p>
+          <p>1. Add your Gemini API key to `.env.local` as `GEMINI_API_KEY`.</p>
           <p>2. Open Speech to capture voice, or Sign to use the camera.</p>
           <p>3. Use Live Conversation for two-way translation.</p>
           <p>4. Emergency cards work offline for urgent messaging.</p>

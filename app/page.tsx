@@ -168,7 +168,7 @@ export default function HomePage() {
                 {
                   step: "02",
                   title: "Process",
-                  body: "Secure serverless routes call OpenAI for transcription, translation, and sentence assembly.",
+                  body: "Secure serverless routes call Gemini for transcription, translation, and sentence assembly.",
                 },
                 {
                   step: "03",

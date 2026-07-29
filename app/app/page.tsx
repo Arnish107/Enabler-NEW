@@ -26,7 +26,7 @@ export default function DashboardPage() {
           Accessibility Dashboard
         </h1>
         <p className="mt-2 text-muted-foreground">
-          Choose a tool to start communicating. All AI runs securely on the server.
+          All AI runs securely on the server via Google Gemini.
         </p>
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

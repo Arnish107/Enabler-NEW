@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { chatCompletion, hasOpenAI } from "@/lib/openai";
+import { chatCompletion, hasGemini } from "@/lib/gemini";
 import { processSignFrames } from "@/lib/sign-classifier";
 import { addHistory } from "@/lib/history-store";
 import type { FrameInput } from "@/lib/types";
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     const classified = processSignFrames(frames);
     let text = classified.text;
 
-    if (hasOpenAI() && classified.gestures.length > 0) {
+    if (hasGemini() && classified.gestures.length > 0) {
       const words = classified.gestures.map((g) => g.word).join(", ");
       const enhanced = await chatCompletion(
         "You convert detected ASL gesture words into one natural, grammatical English sentence for an accessibility app. Return only the sentence.",
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
       confidence: classified.confidence,
       gestures: classified.gestures,
       pipeline: classified.pipeline,
-      source: hasOpenAI() ? "mediapipe+openai" : "mediapipe",
+      source: hasGemini() ? "mediapipe+gemini" : "mediapipe",
     });
   } catch (error) {
     const message =

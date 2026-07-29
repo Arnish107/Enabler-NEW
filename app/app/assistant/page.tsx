@@ -49,7 +49,7 @@ export default function AssistantPage() {
           <CardTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary" /> Enabler AI
           </CardTitle>
-          <Badge>OpenAI</Badge>
+          <Badge>Gemini</Badge>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-wrap gap-2">

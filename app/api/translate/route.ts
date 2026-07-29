@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { chatCompletion, hasOpenAI } from "@/lib/openai";
+import { chatCompletion, hasGemini } from "@/lib/gemini";
 import { languageName } from "@/lib/languages";
 import { mapTextToSigns } from "@/lib/sign-mapping";
 
 export async function POST(request: NextRequest) {
   try {
-    if (!hasOpenAI()) {
+    if (!hasGemini()) {
       return NextResponse.json(
         {
           error: "missing_key",
-          message: "OPENAI_API_KEY is not configured.",
+          message: "GEMINI_API_KEY is not configured.",
         },
         { status: 503 },
       );
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
         signs,
         direction,
         confidence: 0.9,
-        source: "openai",
+        source: "gemini",
       });
     }
 
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
       sourceLang,
       targetLang,
       confidence: 0.93,
-      source: "openai",
+      source: "gemini",
     });
   } catch (error) {
     const message =

@@ -6,7 +6,7 @@
 
 ## Stack
 
-Next.js 15 · TypeScript · Tailwind CSS · Framer Motion · OpenAI · MediaPipe Hands · Web Speech API · Vercel
+Next.js 15 · TypeScript · Tailwind CSS · Framer Motion · Google Gemini · MediaPipe Hands · Web Speech API · Vercel
 
 ## Setup
 
@@ -15,10 +15,10 @@ npm install
 cp .env.example .env.local
 ```
 
-Add your OpenAI key to `.env.local`:
+Add your Gemini key to `.env.local`:
 
 ```
-OPENAI_API_KEY=sk-...
+GEMINI_API_KEY=your-gemini-api-key
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
@@ -44,7 +44,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/api/health` | GET | Health + OpenAI status |
+| `/api/health` | GET | Health + Gemini status |
 | `/api/speech-to-text` | POST | Transcript cleanup + sign mapping |
 | `/api/sign-to-text` | POST | MediaPipe landmarks → text |
 | `/api/translate` | POST | Multi-language / ASL gloss |
@@ -58,7 +58,7 @@ Open [http://localhost:3000](http://localhost:3000).
 2. Import the repo in Vercel
 3. Framework: **Next.js**
 4. **Output Directory: leave blank** (uses `.next`, never `dist`)
-5. Add `OPENAI_API_KEY` in Environment Variables
+5. Add `GEMINI_API_KEY` in Environment Variables
 6. Deploy
 
 `vercel.json` is minimal:
@@ -67,21 +67,8 @@ Open [http://localhost:3000](http://localhost:3000).
 { "framework": "nextjs" }
 ```
 
-## Features
-
-- Splash intro → marketing homepage
-- Accessibility dashboard with sidebar
-- Speech → Sign (Web Speech + OpenAI)
-- Sign → Text (MediaPipe + OpenAI)
-- Live conversation (20 languages)
-- Video translation
-- Emergency cards
-- Sound alerts UI
-- AI assistant
-- History & settings (theme, contrast, reduced motion)
-
 ## Security
 
-- API keys only via `process.env.OPENAI_API_KEY`
+- API keys only via `process.env.GEMINI_API_KEY`
 - No keys in client bundles
 - Graceful 503 when key is missing

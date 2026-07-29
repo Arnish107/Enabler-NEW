@@ -71,7 +71,7 @@ export function AppSidebar() {
       </nav>
       <div className="border-t border-border p-4">
         <p className="text-xs text-muted-foreground">
-          Secure OpenAI-powered processing
+          Secure Gemini-powered processing
         </p>
       </div>
     </div>
