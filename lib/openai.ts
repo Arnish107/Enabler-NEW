@@ -4,7 +4,12 @@ const TEXT_MODEL = "gemini-2.0-flash";
 const AUDIO_MODEL = "gemini-2.0-flash";
 
 function getApiKey(): string | null {
-  const key = process.env.GEMINI_API_KEY;
+  const raw =
+    process.env.GEMINI_API_KEY ||
+    process.env.GOOGLE_GENERATIVE_AI_API_KEY ||
+    process.env.GOOGLE_API_KEY ||
+    "";
+  const key = raw.trim();
   if (!key || key.includes("YOUR_GEMINI") || key.includes("PASTE_YOUR")) {
     return null;
   }

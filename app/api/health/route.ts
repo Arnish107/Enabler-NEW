@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { hasGemini } from "@/lib/gemini";
 
 export async function GET() {
@@ -8,6 +8,14 @@ export async function GET() {
     version: "3.0.0",
     timestamp: new Date().toISOString(),
     gemini: hasGemini(),
+    // Presence only — never returns the secret value
+    env: {
+      GEMINI_API_KEY: Boolean(process.env.GEMINI_API_KEY?.trim()),
+      GOOGLE_GENERATIVE_AI_API_KEY: Boolean(
+        process.env.GOOGLE_GENERATIVE_AI_API_KEY?.trim(),
+      ),
+      GOOGLE_API_KEY: Boolean(process.env.GOOGLE_API_KEY?.trim()),
+    },
     endpoints: [
       "GET /api/health",
       "POST /api/speech-to-text",
