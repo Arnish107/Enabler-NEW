@@ -5,12 +5,13 @@ import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { EnterAppButton } from "@/components/enter-app-button";
 import { Button } from "@/components/ui/button";
 
 const links = [
   { href: "/#features", label: "Features" },
   { href: "/#how", label: "How it works" },
-  { href: "/app", label: "Dashboard" },
+  { href: "/app/help", label: "Help" },
 ];
 
 export function SiteHeader() {
@@ -33,9 +34,7 @@ export function SiteHeader() {
         </nav>
         <div className="hidden items-center gap-2 md:flex">
           <ThemeToggle />
-          <Button asChild size="sm">
-            <Link href="/app">Get Started</Link>
-          </Button>
+          <EnterAppButton size="sm">Get Started</EnterAppButton>
         </div>
         <div className="flex items-center gap-2 md:hidden">
           <ThemeToggle />
@@ -66,11 +65,12 @@ export function SiteHeader() {
                 {link.label}
               </Link>
             ))}
-            <Button asChild className="mt-2">
-              <Link href="/app" onClick={() => setOpen(false)}>
-                Get Started
-              </Link>
-            </Button>
+            <EnterAppButton
+              className="mt-2"
+              onBeforeNavigate={() => setOpen(false)}
+            >
+              Get Started
+            </EnterAppButton>
           </div>
         </nav>
       )}

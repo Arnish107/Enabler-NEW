@@ -14,7 +14,7 @@ import {
   Settings,
 } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
-import { Button } from "@/components/ui/button";
+import { EnterAppButton } from "@/components/enter-app-button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 const features = [
@@ -106,14 +106,12 @@ export default function HomePage() {
               transition={{ delay: 0.18 }}
               className="mt-10 flex flex-wrap items-center justify-center gap-4"
             >
-              <Button asChild size="lg">
-                <Link href="/app">
-                  Get Started <ArrowRight className="h-4 w-4" />
-                </Link>
-              </Button>
-              <Button asChild variant="secondary" size="lg">
-                <Link href="/app/speech">Live Demo</Link>
-              </Button>
+              <EnterAppButton size="lg">
+                Get Started <ArrowRight className="h-4 w-4" />
+              </EnterAppButton>
+              <EnterAppButton href="/app/speech" variant="secondary" size="lg">
+                Live Demo
+              </EnterAppButton>
             </motion.div>
           </div>
         </section>
@@ -198,9 +196,9 @@ export default function HomePage() {
             Open the dashboard and try Speech → Sign, Sign → Text, Live Conversation,
             and Emergency Cards in minutes.
           </p>
-          <Button asChild size="xl" className="mt-8">
-            <Link href="/app">Open Dashboard</Link>
-          </Button>
+          <EnterAppButton size="xl" className="mt-8">
+            Open Dashboard
+          </EnterAppButton>
         </section>
 
         <footer className="border-t border-border py-10">

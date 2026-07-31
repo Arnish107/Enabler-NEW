@@ -1,4 +1,5 @@
 import { AppSidebar } from "@/components/app-sidebar";
+import { AppPageTransition } from "@/components/app-page-transition";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -11,7 +12,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <ThemeToggle />
         </header>
         <main id="main" className="px-4 pb-16 pt-20 lg:px-8 lg:pt-8">
-          {children}
+          <AppPageTransition>{children}</AppPageTransition>
         </main>
       </div>
     </div>
