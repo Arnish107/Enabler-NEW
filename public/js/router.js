@@ -4,12 +4,12 @@ window.EnablerRouter = (function () {
   var onRouteChange = null;
 
   var sidebarLinks = [
-    { path: "speech-sign", label: "Speech → Sign", icon: "🎤" },
-    { path: "sign-text", label: "Sign → Text", icon: "🤟" },
-    { path: "live", label: "Live Conversation", icon: "💬" },
-    { path: "video", label: "Video Translation", icon: "🎬" },
-    { path: "emergency", label: "Emergency", icon: "🚨" },
-    { path: "alerts", label: "Sound Alerts", icon: "🔔" },
+    { path: "speech-sign", label: "Speech → Sign", icon: "Sp" },
+    { path: "sign-text", label: "Sign → Text", icon: "Sg" },
+    { path: "live", label: "Live Conversation", icon: "Lv" },
+    { path: "video", label: "Video Translation", icon: "Vd" },
+    { path: "emergency", label: "Emergency", icon: "Em" },
+    { path: "alerts", label: "Sound Alerts", icon: "Al" },
   ];
 
   function register(name, handler) {

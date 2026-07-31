@@ -2,13 +2,12 @@ import signMapping from "@/lib/data/sign-mapping.json";
 
 const MAPPING = signMapping as Record<
   string,
-  { gesture: string; emoji: string; label: string }
+  { gesture: string; label: string }
 >;
 
 export type SignSequenceItem = {
   word: string;
   gesture: string;
-  emoji: string;
   label: string;
 };
 
@@ -25,7 +24,6 @@ export function mapTextToSigns(text: string): SignSequenceItem[] {
     return {
       word: clean,
       gesture: entry.gesture,
-      emoji: entry.emoji,
       label: entry.label,
     };
   });

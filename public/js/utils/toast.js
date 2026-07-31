@@ -16,7 +16,7 @@ window.EnablerToast = (function () {
       success: "✓",
       error: "✕",
       info: "ℹ",
-      warning: "⚠",
+      warning: "!",
     };
 
     var toast = document.createElement("div");

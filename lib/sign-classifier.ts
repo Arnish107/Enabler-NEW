@@ -3,7 +3,7 @@ import type { FrameInput, GestureResult, PipelineStep } from "@/lib/types";
 
 const GESTURES = gestureDictionary.gestures as Record<
   string,
-  { label: string; primaryWord: string; emoji: string }
+  { label: string; primaryWord: string }
 >;
 
 const MIN_GESTURE_CONFIDENCE = 0.55;

@@ -12,7 +12,7 @@ EnablerViews["speech-sign"] = {
       '<div class="page-grid page-grid-2">' +
       '<div class="card"><div class="card-header"><h2 class="card-title">Input</h2><span class="badge" id="speech-status">Ready</span></div>' +
       '<div class="card-body" style="text-align:center">' +
-      '<button class="mic-btn" id="mic-btn" aria-label="Start recording" type="button">🎤</button>' +
+      '<button class="mic-btn" id="mic-btn" aria-label="Start recording" type="button">Mic</button>' +
       '<p style="margin:1rem 0 0;color:var(--text-muted);font-size:0.875rem" id="mic-hint">Click to start speaking</p>' +
       '<p style="margin:0.5rem 0 0;font-size:0.8125rem;color:var(--text-muted)" id="confidence-display"></p>' +
       '<div class="form-group" style="margin-top:1.5rem;text-align:left">' +
@@ -23,7 +23,7 @@ EnablerViews["speech-sign"] = {
       '<span class="badge" id="sign-confidence"></span></div>' +
       '<div class="card-body">' +
       '<div class="sign-avatar" id="sign-output">' +
-      '<span class="sign-figure" id="sign-figure" aria-hidden="true">🤟</span>' +
+      '<span class="sign-figure" id="sign-figure" aria-hidden="true">SIGN</span>' +
       '<span class="sign-label" id="sign-word">Waiting for input</span>' +
       "</div>" +
       '<div id="sign-sequence" style="margin-top:1rem;display:flex;flex-wrap:wrap;gap:0.5rem"></div>' +
@@ -189,7 +189,7 @@ EnablerViews["speech-sign"] = {
       }
 
       signWord.textContent = sequence[0].label;
-      signFigure.textContent = sequence[0].emoji;
+      signFigure.textContent = sequence[0].label || "SIGN";
       signConfidence.textContent = Math.round(result.confidence * 100) + "% confidence";
       signConfidence.className = "badge badge-success";
 
@@ -199,8 +199,6 @@ EnablerViews["speech-sign"] = {
             '<span class="badge" title="' +
             s.gesture +
             '">' +
-            s.emoji +
-            " " +
             s.label +
             "</span>"
           );
@@ -218,7 +216,7 @@ EnablerViews["speech-sign"] = {
 
 function renderHistory(history) {
   if (!history.length) {
-    return '<div class="empty-state"><div class="empty-state-icon">📝</div><h3>No translations yet</h3><p>Start speaking to build your history.</p></div>';
+    return '<div class="empty-state"><div class="empty-state-icon"></div><h3>No translations yet</h3><p>Start speaking to build your history.</p></div>';
   }
   return (
     '<ul class="history-list">' +

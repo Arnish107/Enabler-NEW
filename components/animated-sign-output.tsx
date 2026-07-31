@@ -2,7 +2,16 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Pause, Play, RotateCcw } from "lucide-react";
+import {
+  Hand,
+  Pause,
+  Play,
+  Pointer,
+  RotateCcw,
+  ThumbsDown,
+  ThumbsUp,
+  type LucideIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -10,7 +19,6 @@ import { cn } from "@/lib/utils";
 
 export type AnimatedSign = {
   word: string;
-  emoji: string;
   label: string;
   gesture?: string;
 };
@@ -22,6 +30,17 @@ type AnimatedSignOutputProps = {
 };
 
 const STEP_MS = 1400;
+
+const gestureIcons: Record<string, LucideIcon> = {
+  hand_wave: Hand,
+  hand_raise: Hand,
+  thumbs_up: ThumbsUp,
+  thumbs_down: ThumbsDown,
+  open_palm: Hand,
+  fist: Hand,
+  point: Pointer,
+  default: Hand,
+};
 
 const gestureMotion: Record<
   string,
@@ -71,8 +90,10 @@ function SignFigure({
   sign: AnimatedSign;
   active: boolean;
 }) {
-  const key = sign.gesture && gestureMotion[sign.gesture] ? sign.gesture : "default";
+  const key =
+    sign.gesture && gestureMotion[sign.gesture] ? sign.gesture : "default";
   const motionCfg = gestureMotion[key];
+  const Icon = gestureIcons[key] || Hand;
 
   return (
     <div className="relative flex min-h-[260px] flex-col items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-b from-primary/10 via-background to-primary/5">
@@ -103,16 +124,22 @@ function SignFigure({
           transition={{ duration: 0.35, ease: "easeOut" }}
         >
           <motion.div
-            className="select-none text-7xl drop-shadow-sm sm:text-8xl"
-            animate={active ? motionCfg.animate : { scale: 1, rotate: 0, x: 0, y: 0 }}
+            className="flex h-28 w-28 items-center justify-center rounded-full bg-primary/15 text-primary sm:h-32 sm:w-32"
+            animate={
+              active ? motionCfg.animate : { scale: 1, rotate: 0, x: 0, y: 0 }
+            }
             transition={
               active
-                ? { ...motionCfg.transition, repeat: Infinity, repeatDelay: 0.25 }
+                ? {
+                    ...motionCfg.transition,
+                    repeat: Infinity,
+                    repeatDelay: 0.25,
+                  }
                 : { duration: 0.2 }
             }
             style={{ originX: 0.5, originY: 1 }}
           >
-            {sign.emoji || "🤟"}
+            <Icon className="h-14 w-14 sm:h-16 sm:w-16" strokeWidth={1.5} />
           </motion.div>
 
           <motion.div
@@ -188,7 +215,13 @@ export function AnimatedSignOutput({
           <span>
             Sign {index + 1} of {signs.length}
           </span>
-          <span>{playing ? "Playing" : index >= signs.length - 1 ? "Finished" : "Paused"}</span>
+          <span>
+            {playing
+              ? "Playing"
+              : index >= signs.length - 1
+                ? "Finished"
+                : "Paused"}
+          </span>
         </div>
         <Progress value={progress} className="h-2" />
       </div>
@@ -203,7 +236,12 @@ export function AnimatedSignOutput({
           {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
           {playing ? "Pause" : "Play"}
         </Button>
-        <Button size="sm" variant="ghost" onClick={replay} aria-label="Replay animation">
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={replay}
+          aria-label="Replay animation"
+        >
           <RotateCcw className="h-4 w-4" />
           Replay
         </Button>
@@ -230,7 +268,7 @@ export function AnimatedSignOutput({
                 i < index && "opacity-70",
               )}
             >
-              {s.emoji} {s.label}
+              {s.label}
             </Badge>
           </button>
         ))}

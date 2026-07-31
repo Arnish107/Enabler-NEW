@@ -13,7 +13,7 @@ EnablerViews.video = {
       '<div class="card-body">' +
       '<div class="upload-zone" id="video-upload">' +
       '<input type="file" id="video-file" accept="video/mp4,video/quicktime,.mp4,.mov" hidden />' +
-      '<div class="upload-zone-icon">🎬</div>' +
+      '<div class="upload-zone-icon">Upload</div>' +
       "<h3>Drop your video here</h3>" +
       "<p>Supports MP4 and MOV files</p>" +
       "</div>" +
@@ -31,7 +31,7 @@ EnablerViews.video = {
       '<div class="card-body" id="transcript-panel">' +
       '<p style="margin:0 0 1rem;font-size:0.875rem;color:var(--text-muted)" id="video-confidence"></p>' +
       '<div class="empty-state" id="transcript-empty">' +
-      '<div class="empty-state-icon">📄</div><h3>No transcript yet</h3><p>Upload a video to begin translation.</p></div>' +
+      '<div class="empty-state-icon">Transcript</div><h3>No transcript yet</h3><p>Upload a video to begin translation.</p></div>' +
       '<textarea class="form-textarea" id="video-transcript" rows="12" hidden readonly></textarea>' +
       '<div style="display:flex;gap:0.5rem;margin-top:1rem;flex-wrap:wrap" id="export-actions" hidden>' +
       '<button class="btn btn-primary btn-sm" id="btn-save" type="button">Save Transcript</button>' +

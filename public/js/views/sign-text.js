@@ -13,7 +13,7 @@ EnablerViews["sign-text"] = {
       '<div class="card-body">' +
       '<div class="camera-preview" id="camera-preview">' +
       '<div class="camera-placeholder" id="camera-placeholder">' +
-      '<p style="font-size:2rem;margin:0 0 0.5rem">📷</p><p>Camera preview will appear here</p></div>' +
+      '<p style="font-size:0.875rem;margin:0 0 0.5rem;font-weight:600">Camera</p><p>Camera preview will appear here</p></div>' +
       '<video id="camera-video" autoplay playsinline muted hidden></video>' +
       '<canvas id="hand-canvas" hidden style="position:absolute;inset:0;width:100%;height:100%"></canvas>' +
       "</div>" +
@@ -24,7 +24,7 @@ EnablerViews["sign-text"] = {
       "</div>" +
       '<div class="upload-zone" id="upload-zone" style="margin-top:1rem">' +
       '<input type="file" id="file-input" accept="video/mp4,video/quicktime,video/*" hidden />' +
-      '<div class="upload-zone-icon">📁</div>' +
+      '<div class="upload-zone-icon">Upload</div>' +
       "<h3>Upload video file</h3>" +
       "<p>Drag & drop or click to upload MP4/MOV</p>" +
       "</div></div></div>" +
@@ -91,7 +91,7 @@ EnablerViews["sign-text"] = {
       }
       video.hidden = true;
       placeholder.hidden = false;
-      placeholder.innerHTML = '<p style="font-size:2rem;margin:0 0 0.5rem">📷</p><p>Camera preview will appear here</p>';
+      placeholder.innerHTML = '<p style="font-size:0.875rem;margin:0 0 0.5rem;font-weight:600">Camera</p><p>Camera preview will appear here</p>';
       btnCamera.disabled = false;
       btnCapture.disabled = true;
       btnStop.hidden = true;

@@ -8,10 +8,10 @@ EnablerViews.emergency = {
       '<p class="page-desc">Tap a card to instantly display critical messages. Designed for high-stress, high-accessibility situations.</p>' +
       "</div>" +
       '<div class="emergency-grid" id="emergency-grid">' +
-      emergencyCard("deaf", "🧏", "I am deaf.", "Tap to display this message on screen.") +
-      emergencyCard("type", "⌨️", "Please type your response.", "Request written communication.") +
-      emergencyCard("medical", "🏥", "I need medical assistance.", "Alert others to a medical emergency.") +
-      emergencyCard("call", "📞", "Call emergency services.", "Request immediate emergency help.") +
+      emergencyCard("deaf", "Deaf", "I am deaf.", "Tap to display this message on screen.") +
+      emergencyCard("type", "Type", "Please type your response.", "Request written communication.") +
+      emergencyCard("medical", "Medical", "I need medical assistance.", "Alert others to a medical emergency.") +
+      emergencyCard("call", "Call", "Call emergency services.", "Request immediate emergency help.") +
       "</div>" +
       '<div class="card" style="margin-top:1.5rem" id="display-card" hidden>' +
       '<div class="card-body" style="text-align:center;padding:3rem 2rem">' +

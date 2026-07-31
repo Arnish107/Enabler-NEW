@@ -12,15 +12,15 @@ EnablerViews.alerts = {
       '<div class="card"><div class="card-header"><h2 class="card-title">Alert Settings</h2>' +
       '<span class="badge badge-success" id="alerts-active">Monitoring</span></div>' +
       '<div class="card-body">' +
-      alertToggle("doorbell", "🔔", "Doorbell", "Get notified when someone rings the doorbell.", alerts.doorbell) +
-      alertToggle("fireAlarm", "🔥", "Fire Alarm", "Critical alert for fire and smoke alarms.", alerts.fireAlarm) +
-      alertToggle("babyCrying", "👶", "Baby Crying", "Detect crying sounds from infants.", alerts.babyCrying) +
-      alertToggle("phoneRinging", "📱", "Phone Ringing", "Alert when your phone is ringing nearby.", alerts.phoneRinging) +
-      alertToggle("carHorn", "🚗", "Car Horn", "Detect car horns and traffic warnings.", alerts.carHorn) +
+      alertToggle("doorbell", "Bell", "Doorbell", "Get notified when someone rings the doorbell.", alerts.doorbell) +
+      alertToggle("fireAlarm", "Fire", "Fire Alarm", "Critical alert for fire and smoke alarms.", alerts.fireAlarm) +
+      alertToggle("babyCrying", "Baby", "Baby Crying", "Detect crying sounds from infants.", alerts.babyCrying) +
+      alertToggle("phoneRinging", "Phone", "Phone Ringing", "Alert when your phone is ringing nearby.", alerts.phoneRinging) +
+      alertToggle("carHorn", "Horn", "Car Horn", "Detect car horns and traffic warnings.", alerts.carHorn) +
       "</div></div>" +
       '<div class="card"><div class="card-header"><h2 class="card-title">Recent Alerts</h2></div>' +
       '<div class="card-body" id="alert-log">' +
-      '<div class="empty-state" id="alert-empty"><div class="empty-state-icon">🔕</div><h3>No alerts yet</h3><p>Enable alerts and simulate detection below.</p></div>' +
+      '<div class="empty-state" id="alert-empty"><div class="empty-state-icon"></div><h3>No alerts yet</h3><p>Enable alerts and simulate detection below.</p></div>' +
       '<ul class="history-list" id="alert-list" hidden></ul>' +
       "</div>" +
       '<div class="card-body" style="border-top:1px solid var(--border)">' +
@@ -101,11 +101,11 @@ function formatAlertName(key) {
 
 function triggerAlert(root, key, alertLog) {
   var icons = {
-    doorbell: "🔔",
-    fireAlarm: "🔥",
-    babyCrying: "👶",
-    phoneRinging: "📱",
-    carHorn: "🚗",
+    doorbell: "Bell",
+    fireAlarm: "Fire",
+    babyCrying: "Baby",
+    phoneRinging: "Phone",
+    carHorn: "Horn",
   };
 
   var isCritical = key === "fireAlarm";

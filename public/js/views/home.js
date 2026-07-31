@@ -26,12 +26,12 @@ EnablerViews.home = {
       '<p class="section-subtitle">Every feature is interactive and ready to use. Click any card to get started.</p>' +
       "</header>" +
       '<div class="features-grid">' +
-      featureCard("speech-sign", "🎤", "Speech to Sign", "Convert spoken language into sign language animations in real time.") +
-      featureCard("sign-text", "🤟", "Sign to Text", "Recognize sign language from camera or video and translate to text.") +
-      featureCard("live", "💬", "Live Conversations", "Split-screen real-time translation between speech and sign.") +
-      featureCard("video", "🎬", "Video Translation", "Upload videos and get accessible transcripts and captions.") +
-      featureCard("alerts", "🔔", "Sound Alerts", "Visual notifications for doorbells, alarms, and environmental sounds.") +
-      featureCard("emergency", "🚨", "Emergency Communication", "Quick-access cards for critical situations.") +
+      featureCard("speech-sign", "Sp", "Speech to Sign", "Convert spoken language into sign language animations in real time.") +
+      featureCard("sign-text", "Sg", "Sign to Text", "Recognize sign language from camera or video and translate to text.") +
+      featureCard("live", "Lv", "Live Conversations", "Split-screen real-time translation between speech and sign.") +
+      featureCard("video", "Vd", "Video Translation", "Upload videos and get accessible transcripts and captions.") +
+      featureCard("alerts", "Al", "Sound Alerts", "Visual notifications for doorbells, alarms, and environmental sounds.") +
+      featureCard("emergency", "Em", "Emergency Communication", "Quick-access cards for critical situations.") +
       "</div></section>" +
       '<section class="about-section" aria-labelledby="about-title">' +
       '<div class="about-grid">' +

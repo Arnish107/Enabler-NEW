@@ -2,56 +2,81 @@
   "gestures": {
     "hand_wave": {
       "label": "wave",
-      "primaryWord": "hello",
-      "emoji": "👋"
+      "primaryWord": "hello"
     },
     "hand_raise": {
       "label": "raised hand",
-      "primaryWord": "help",
-      "emoji": "🙋"
+      "primaryWord": "help"
     },
     "thumbs_up": {
       "label": "thumbs up",
-      "primaryWord": "yes",
-      "emoji": "👍"
+      "primaryWord": "yes"
     },
     "thumbs_down": {
       "label": "thumbs down",
-      "primaryWord": "no",
-      "emoji": "👎"
+      "primaryWord": "no"
     },
     "open_palm": {
       "label": "open palm",
-      "primaryWord": "stop",
-      "emoji": "✋"
+      "primaryWord": "stop"
     },
     "fist": {
       "label": "closed fist",
-      "primaryWord": "wait",
-      "emoji": "✊"
+      "primaryWord": "wait"
     },
     "point": {
       "label": "pointing",
-      "primaryWord": "you",
-      "emoji": "👉"
+      "primaryWord": "you"
     }
   },
   "wordToGestures": {
-    "hello": ["hand_wave"],
-    "hi": ["hand_wave"],
-    "goodbye": ["hand_wave"],
-    "help": ["hand_raise"],
-    "please": ["hand_raise"],
-    "yes": ["thumbs_up"],
-    "good": ["thumbs_up"],
-    "okay": ["thumbs_up"],
-    "no": ["thumbs_down"],
-    "stop": ["open_palm"],
-    "wait": ["fist"],
-    "you": ["point"],
-    "thank": ["hand_wave"],
-    "thanks": ["hand_wave"],
-    "medical": ["hand_raise"],
-    "emergency": ["hand_raise"]
+    "hello": [
+      "hand_wave"
+    ],
+    "hi": [
+      "hand_wave"
+    ],
+    "goodbye": [
+      "hand_wave"
+    ],
+    "help": [
+      "hand_raise"
+    ],
+    "please": [
+      "hand_raise"
+    ],
+    "yes": [
+      "thumbs_up"
+    ],
+    "good": [
+      "thumbs_up"
+    ],
+    "okay": [
+      "thumbs_up"
+    ],
+    "no": [
+      "thumbs_down"
+    ],
+    "stop": [
+      "open_palm"
+    ],
+    "wait": [
+      "fist"
+    ],
+    "you": [
+      "point"
+    ],
+    "thank": [
+      "hand_wave"
+    ],
+    "thanks": [
+      "hand_wave"
+    ],
+    "medical": [
+      "hand_raise"
+    ],
+    "emergency": [
+      "hand_raise"
+    ]
   }
 }

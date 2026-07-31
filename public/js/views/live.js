@@ -21,7 +21,7 @@ EnablerViews.live = {
       "</div>" +
       '<div class="chat-split">' +
       '<div class="chat-panel">' +
-      '<div class="chat-panel-header"><span>🗣️ Speaker A</span><span class="badge">Speech</span></div>' +
+      '<div class="chat-panel-header"><span> Speaker A</span><span class="badge">Speech</span></div>' +
       '<div class="chat-messages" id="chat-left">' +
       renderMessages(messages.filter(function (m) { return m.side === "left"; })) +
       "</div>" +
@@ -30,7 +30,7 @@ EnablerViews.live = {
       '<button class="btn btn-primary btn-sm" id="send-left" type="button">Send</button>' +
       "</div></div>" +
       '<div class="chat-panel">' +
-      '<div class="chat-panel-header"><span>🤟 Speaker B</span><span class="badge">Sign → Text</span></div>' +
+      '<div class="chat-panel-header"><span> Speaker B</span><span class="badge">Sign → Text</span></div>' +
       '<div class="chat-messages" id="chat-right">' +
       renderMessages(messages.filter(function (m) { return m.side === "right"; })) +
       "</div>" +
@@ -159,7 +159,7 @@ function appendBubble(container, text, type) {
 }
 
 function emptyChat() {
-  return '<div class="empty-state" style="padding:2rem 1rem"><div class="empty-state-icon">💬</div><h3>No messages yet</h3><p>Start a conversation to see live translation.</p></div>';
+  return '<div class="empty-state" style="padding:2rem 1rem"><div class="empty-state-icon"></div><h3>No messages yet</h3><p>Start a conversation to see live translation.</p></div>';
 }
 
 function escapeHtml(str) {
