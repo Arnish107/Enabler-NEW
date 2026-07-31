@@ -4,6 +4,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const base = process.env.NEXT_PUBLIC_APP_URL || "https://enabler.app";
   const routes = [
     "",
+    "/enter",
     "/app",
     "/app/speech",
     "/app/sign",
