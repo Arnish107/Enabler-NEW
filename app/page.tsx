@@ -104,12 +104,17 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.18 }}
-              className="mt-10 flex flex-wrap items-center justify-center gap-4"
+              className="mt-10 flex w-full flex-col items-stretch justify-center gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:gap-4"
             >
-              <EnterAppButton size="lg">
+              <EnterAppButton size="lg" className="w-full sm:w-auto">
                 Get Started <ArrowRight className="h-4 w-4" />
               </EnterAppButton>
-              <EnterAppButton href="/app/speech" variant="secondary" size="lg">
+              <EnterAppButton
+                href="/app/speech"
+                variant="secondary"
+                size="lg"
+                className="w-full sm:w-auto"
+              >
                 Live Demo
               </EnterAppButton>
             </motion.div>

@@ -10,10 +10,10 @@ const DEFAULT_DEST = "/app";
 const TOTAL_MS = 2800;
 
 const steps = [
-  { label: "Loading workspace", icon: Mic },
-  { label: "Preparing accessibility tools", icon: Hand },
-  { label: "Connecting live translation", icon: MessagesSquare },
-  { label: "Opening your dashboard", icon: ShieldAlert },
+  { label: "Workspace", mobile: "Workspace", icon: Mic },
+  { label: "Sign tools", mobile: "Sign tools", icon: Hand },
+  { label: "Live chat", mobile: "Live chat", icon: MessagesSquare },
+  { label: "Dashboard", mobile: "Dashboard", icon: ShieldAlert },
 ];
 
 function safeDestination(raw: string | null): string {
@@ -63,95 +63,125 @@ function EnterExperience() {
   return (
     <main
       id="main"
-      className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-6 py-16"
+      className="relative flex min-h-[100dvh] flex-col items-center justify-center overflow-hidden px-4 py-10 sm:px-6 sm:py-16"
       role="status"
       aria-live="polite"
       aria-label="Entering Enabler dashboard"
     >
       <div className="gradient-mesh absolute inset-0" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_30%,hsl(var(--primary)/0.22),transparent_55%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_28%,hsl(var(--primary)/0.28),transparent_52%)]" />
 
+      {/* Mobile phone-frame card */}
       <motion.div
-        className="relative z-10 flex w-full max-w-lg flex-col items-center text-center"
-        initial={{ opacity: 0, y: 24, scale: 0.96 }}
+        className="relative z-10 w-full max-w-md rounded-[2rem] border border-border/80 bg-card/80 p-5 shadow-glow backdrop-blur-xl sm:max-w-lg sm:rounded-[2.25rem] sm:p-8"
+        initial={{ opacity: 0, y: 28, scale: 0.96 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
       >
-        <motion.div
-          className="mb-8 flex h-28 w-28 items-center justify-center rounded-[2rem] border border-primary/30 bg-primary/15 shadow-glow"
-          animate={{ scale: [1, 1.05, 1], rotate: [0, -2, 2, 0] }}
-          transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
-        >
-          <Image
-            src="/assets/logo-icon.svg"
-            alt="Enabler"
-            width={72}
-            height={72}
-            priority
-            className="h-16 w-16"
-          />
-        </motion.div>
+        <div className="mx-auto mb-5 h-1.5 w-16 rounded-full bg-muted sm:hidden" aria-hidden />
 
-        <p className="text-xs font-semibold uppercase tracking-[0.28em] text-primary">
-          Entering Enabler
-        </p>
-        <h1 className="mt-3 font-display text-3xl font-bold tracking-tight md:text-5xl">
-          Opening your workspace
-        </h1>
-        <p className="mt-4 max-w-md text-base text-muted-foreground md:text-lg">
-          You are moving from the landing page into the accessibility dashboard.
-          Tools will be ready in a moment.
-        </p>
-
-        <div className="mt-10 flex w-full flex-col items-center gap-4">
-          <div className="flex items-center gap-3 rounded-full border border-border bg-card/80 px-4 py-2 text-sm font-medium backdrop-blur">
-            <StepIcon className="h-4 w-4 text-primary" />
-            <span>{steps[stepIndex]?.label}</span>
-          </div>
-
-          <div className="h-2.5 w-full overflow-hidden rounded-full bg-muted">
-            <motion.div
-              className="h-full rounded-full bg-gradient-to-r from-primary to-cyan"
-              initial={{ width: "0%" }}
-              animate={{ width: `${progress}%` }}
-              transition={{ ease: "linear", duration: 0.1 }}
+        <div className="flex flex-col items-center text-center">
+          <motion.div
+            className="mb-5 flex h-20 w-20 items-center justify-center rounded-[1.5rem] border border-primary/30 bg-primary/15 shadow-glow sm:mb-8 sm:h-28 sm:w-28 sm:rounded-[2rem]"
+            animate={{ scale: [1, 1.05, 1] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <Image
+              src="/assets/logo-icon.svg"
+              alt="Enabler"
+              width={72}
+              height={72}
+              priority
+              className="h-12 w-12 sm:h-16 sm:w-16"
             />
-          </div>
-          <p className="text-sm font-semibold tabular-nums text-foreground">
-            {progress}%
-          </p>
-        </div>
+          </motion.div>
 
-        <ol className="mt-10 grid w-full gap-2 text-left sm:grid-cols-2">
-          {steps.map((step, i) => {
-            const Icon = step.icon;
-            const active = i === stepIndex;
-            const done = i < stepIndex;
-            return (
-              <li
+          <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-primary sm:text-xs">
+            Entering Enabler
+          </p>
+          <h1 className="mt-2 font-display text-2xl font-bold tracking-tight sm:mt-3 sm:text-4xl md:text-5xl">
+            Opening your workspace
+          </h1>
+          <p className="mt-3 max-w-sm text-sm text-muted-foreground sm:mt-4 sm:text-base md:text-lg">
+            <span className="sm:hidden">
+              Setting up your mobile accessibility tools…
+            </span>
+            <span className="hidden sm:inline">
+              You are moving from the landing page into the accessibility
+              dashboard. Tools will be ready in a moment.
+            </span>
+          </p>
+
+          <div className="mt-7 flex w-full flex-col items-center gap-3 sm:mt-10 sm:gap-4">
+            <div className="flex w-full items-center justify-center gap-2 rounded-2xl border border-border bg-background/70 px-3 py-2.5 text-sm font-medium sm:w-auto sm:rounded-full sm:px-4 sm:py-2">
+              <StepIcon className="h-4 w-4 shrink-0 text-primary" />
+              <span className="truncate">{steps[stepIndex]?.label}</span>
+            </div>
+
+            <div className="h-3 w-full overflow-hidden rounded-full bg-muted sm:h-2.5">
+              <motion.div
+                className="h-full rounded-full bg-gradient-to-r from-primary to-cyan"
+                initial={{ width: "0%" }}
+                animate={{ width: `${progress}%` }}
+                transition={{ ease: "linear", duration: 0.1 }}
+              />
+            </div>
+            <p className="text-base font-bold tabular-nums text-foreground sm:text-sm sm:font-semibold">
+              {progress}%
+            </p>
+          </div>
+
+          {/* Mobile: horizontal step dots; desktop: cards */}
+          <div className="mt-6 flex w-full items-center justify-center gap-2 sm:hidden" aria-hidden>
+            {steps.map((step, i) => (
+              <span
                 key={step.label}
-                className={`flex items-center gap-3 rounded-2xl border px-3 py-3 text-sm transition ${
-                  active
-                    ? "border-primary/50 bg-primary/10 text-foreground"
-                    : done
-                      ? "border-border bg-muted/50 text-muted-foreground"
-                      : "border-border/60 text-muted-foreground/70"
+                className={`h-2 rounded-full transition-all ${
+                  i === stepIndex
+                    ? "w-8 bg-primary"
+                    : i < stepIndex
+                      ? "w-2 bg-primary/50"
+                      : "w-2 bg-muted-foreground/30"
                 }`}
-              >
-                <span
-                  className={`flex h-8 w-8 items-center justify-center rounded-xl ${
-                    active || done
-                      ? "bg-primary/15 text-primary"
-                      : "bg-muted text-muted-foreground"
+              />
+            ))}
+          </div>
+
+          <ol className="mt-6 hidden w-full gap-2 text-left sm:mt-10 sm:grid sm:grid-cols-2">
+            {steps.map((step, i) => {
+              const Icon = step.icon;
+              const active = i === stepIndex;
+              const done = i < stepIndex;
+              return (
+                <li
+                  key={step.label}
+                  className={`flex items-center gap-3 rounded-2xl border px-3 py-3 text-sm transition ${
+                    active
+                      ? "border-primary/50 bg-primary/10 text-foreground"
+                      : done
+                        ? "border-border bg-muted/50 text-muted-foreground"
+                        : "border-border/60 text-muted-foreground/70"
                   }`}
                 >
-                  <Icon className="h-4 w-4" />
-                </span>
-                {step.label}
-              </li>
-            );
-          })}
-        </ol>
+                  <span
+                    className={`flex h-8 w-8 items-center justify-center rounded-xl ${
+                      active || done
+                        ? "bg-primary/15 text-primary"
+                        : "bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    <Icon className="h-4 w-4" />
+                  </span>
+                  {step.label}
+                </li>
+              );
+            })}
+          </ol>
+
+          <p className="mt-5 text-xs text-muted-foreground sm:hidden">
+            Optimized for phones and tablets
+          </p>
+        </div>
       </motion.div>
     </main>
   );
@@ -161,7 +191,7 @@ export default function EnterPage() {
   return (
     <Suspense
       fallback={
-        <main className="flex min-h-screen items-center justify-center">
+        <main className="flex min-h-[100dvh] items-center justify-center px-4">
           <p className="text-sm text-muted-foreground">Preparing Enabler…</p>
         </main>
       }

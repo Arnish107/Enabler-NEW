@@ -32,14 +32,14 @@ export default function DashboardPage() {
         <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
           Welcome back
         </p>
-        <h1 className="font-display text-3xl font-bold tracking-tight">
+        <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
           Accessibility Dashboard
         </h1>
-        <p className="mt-2 text-muted-foreground">
+        <p className="mt-2 text-sm text-muted-foreground sm:text-base">
           Choose a tool to start communicating. All AI runs securely via Google Gemini.
         </p>
       </motion.div>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
         {tools.map((tool, i) => (
           <motion.div
             key={tool.href}
@@ -48,13 +48,15 @@ export default function DashboardPage() {
             transition={{ delay: 0.08 + i * 0.05, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
           >
             <Link href={tool.href} className="group block h-full">
-              <Card className="h-full transition duration-300 group-hover:-translate-y-1 group-hover:border-primary/40 group-hover:shadow-glow">
-                <CardHeader>
-                  <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <Card className="h-full transition duration-300 active:scale-[0.99] group-hover:-translate-y-1 group-hover:border-primary/40 group-hover:shadow-glow">
+                <CardHeader className="flex flex-row items-center gap-4 space-y-0 p-4 sm:flex-col sm:items-start sm:gap-0 sm:space-y-1.5 sm:p-6">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary sm:mb-2 sm:h-10 sm:w-10">
                     <tool.icon className="h-5 w-5" />
                   </div>
-                  <CardTitle>{tool.title}</CardTitle>
-                  <CardDescription>{tool.desc}</CardDescription>
+                  <div>
+                    <CardTitle className="text-base sm:text-lg">{tool.title}</CardTitle>
+                    <CardDescription className="mt-1">{tool.desc}</CardDescription>
+                  </div>
                 </CardHeader>
               </Card>
             </Link>

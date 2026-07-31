@@ -97,8 +97,8 @@ export function AppSidebar() {
         </div>
       </div>
       {open && (
-        <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-xl lg:hidden">
-          <div className="absolute right-4 top-3">
+        <div className="fixed inset-0 z-50 bg-background/95 pb-[calc(4.5rem+env(safe-area-inset-bottom))] backdrop-blur-xl lg:hidden">
+          <div className="absolute right-4 top-[max(0.75rem,env(safe-area-inset-top))]">
             <Button
               variant="ghost"
               size="icon"
@@ -108,7 +108,7 @@ export function AppSidebar() {
               <X className="h-5 w-5" />
             </Button>
           </div>
-          {content}
+          <div className="h-full overflow-y-auto pt-12">{content}</div>
         </div>
       )}
     </>

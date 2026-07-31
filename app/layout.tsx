@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import { Providers } from "@/components/providers";
 import { SplashScreen } from "@/components/splash-screen";
@@ -24,6 +24,15 @@ export const metadata: Metadata = {
   },
   description:
     "AI-powered accessibility platform for speech-to-sign, sign-to-text, live conversation, and emergency communication.",
+  applicationName: "Enabler",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Enabler",
+  },
+  formatDetection: {
+    telephone: false,
+  },
   openGraph: {
     title: "Enabler",
     description: "Breaking Communication Barriers Through AI",
@@ -36,6 +45,17 @@ export const metadata: Metadata = {
     description: "Breaking Communication Barriers Through AI",
   },
   robots: { index: true, follow: true },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f5f7fb" },
+    { media: "(prefers-color-scheme: dark)", color: "#0b0f1a" },
+  ],
 };
 
 export default function RootLayout({
