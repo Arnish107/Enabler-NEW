@@ -102,7 +102,7 @@ const faqs = [
   },
   {
     q: "I see a Gemini / API key or quota error",
-    a: "AI features need GEMINI_API_KEY on the server (Vercel env vars for production). If the key works but requests fail with 429, wait and retry or switch GEMINI_MODEL to a current free-tier model such as gemini-3.1-flash-lite.",
+    a: "AI features need GEMINI_API_KEY on the server (Vercel env vars for production). If the key works but requests fail with 429, wait and retry or set GEMINI_MODEL to gemini-3.5-flash-lite for a lighter free-tier option.",
   },
   {
     q: "Translations look wrong or incomplete",

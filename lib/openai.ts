@@ -1,16 +1,16 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 /**
- * Prefer models open to new Google AI Studio users.
- * gemini-2.0-flash / gemini-2.5-flash are restricted or shut down for many accounts.
+ * Prefer stronger production Flash models available to Gemini API users.
+ * Older 2.x / early 2.5 models are restricted or shut down for many accounts.
  */
-const DEFAULT_MODEL = "gemini-3.1-flash-lite";
+const DEFAULT_MODEL = "gemini-3.6-flash";
 
 const FALLBACK_MODELS = [
-  "gemini-3.1-flash-lite",
-  "gemini-3.5-flash-lite",
   "gemini-3.6-flash",
   "gemini-3.5-flash",
+  "gemini-3.5-flash-lite",
+  "gemini-3.1-flash-lite",
 ] as const;
 
 function isModelUnavailable(message: string): boolean {
@@ -55,7 +55,7 @@ function formatGeminiError(error: unknown, modelTried: string): Error {
     message.includes("RESOURCE_EXHAUSTED")
   ) {
     return new Error(
-      `Gemini quota exceeded for model "${modelTried}". Wait and retry, set GEMINI_MODEL to another model (e.g. gemini-3.5-flash-lite), or enable billing in Google AI Studio. Original: ${message}`,
+      `Gemini quota exceeded for model "${modelTried}". Wait and retry, set GEMINI_MODEL (e.g. gemini-3.5-flash-lite), or enable billing in Google AI Studio. Original: ${message}`,
     );
   }
   return error instanceof Error ? error : new Error(message);
